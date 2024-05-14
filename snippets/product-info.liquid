@@ -102,7 +102,7 @@
 {% endcomment %}
 {%- capture product_form_id -%}product-form-{{ product.id }}{%- endcapture -%}
 
-<safe-sticky class="product-info {{ class }}">
+<safe-sticky class="product-info {{ class }} text-black">
   {%- for block in section.blocks -%}
     {%- assign previous_block_index = forloop.index0 | minus: 1 -%}
     {%- assign previous_block = section.blocks[previous_block_index] -%}
@@ -128,7 +128,7 @@
 
       {%- when 'title' -%}
         {%- if request.page_type == 'product' -%}
-          <h1 class="product-info__title {{ block.settings.heading_tag }}" {{ block.shopify_attributes }}>
+          <h1 class="text-black product-info__title {{ block.settings.heading_tag }}" {{ block.shopify_attributes }}>
             <span>{{ product.title }}</span>
           </h1>
         {%- else -%}

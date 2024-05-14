@@ -10061,14 +10061,6 @@ split-lines {
   color: rgb(var(--error-text));
 }
 
-.text-subdued {
-  color: rgb(var(--text-color) / .7);
-}
-
-.text-on-sale {
-  color: rgb(var(--text-color));
-}
-
 .text-price-lg {
   font-size: var(--text-price-lg);
   font-weight: var(--thin-font-weight);
