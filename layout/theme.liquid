@@ -62,6 +62,7 @@ NOTE TO DEVELOPERS: welcome to Impact theme! We hope that you will enjoy editing
 
     {{ content_for_header }}
 
+    {{ 'style.css' | asset_url | stylesheet_tag }}
     {{- 'theme.css' | asset_url | stylesheet_tag: preload: true -}}
 
     {% comment %} imported from legacy theme below {% endcomment %}

@@ -1,0 +1,17 @@
+{
+  "name": "fa-theme",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently  -c \"auto\" \"npm:dev:*\"",
+    "dev:tailwind": "npx tailwindcss -i ./style.css -o ./assets/style.css --watch",
+    "dev:shopify": "shopify theme dev --store 3eebc0-c2.myshopify.com --theme 142610202864"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "tailwindcss": "^3.4.3"
+  }
+}
