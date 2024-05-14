@@ -1,0 +1,85 @@
+.announcement-bar.d_none {
+  display: none !important;
+}
+.announcement-bar {
+  padding-block-start: var(--spacing-1-5);
+  padding-block-end: var(--spacing-1-5);
+}
+.announcement-bar__wrapper {
+  width: 100%;
+  max-width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+announcement-bar#announcement-bar {
+  width: 100%;
+  max-width: 100%;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+.countdown_message_container.is-selected {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+}
+.countdown_message_container.is-selected {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+}
+.countdown_message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: auto;
+  margin-right: auto;
+  gap: 1rem;
+}
+.countdown_close {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.countdown_message_timer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+p.countdown_message_timer_value_el {
+  background: rgb(17, 23, 27, 0.3);
+  border-radius: 0.2rem;
+  padding: 0.2rem 0.4rem;
+}
+p.countdown_message_timer_value_text {
+  font-size: 0.8rem;
+}
+.countdown_message_text {
+  font-size: 0.9rem;
+}
+.countdown_message .button {
+  background: #fff !important;
+  color: #11171b !important;
+}
+
+@media only screen and (max-width: 900px) {
+  .countdown_message {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0;
+  }
+  .countdown_message_text {
+    width: 100%;
+    margin-bottom: 0.25rem;
+    font-size: 0.93rem;
+  }
+  .countdown_message_timer {
+    margin-right: 0.4rem;
+  }
+}

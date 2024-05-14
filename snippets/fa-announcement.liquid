@@ -1,0 +1,286 @@
+{% style %}
+  .announce-countdown {
+    {% if settings.background_image != blank %}background-image: url('{{ settings.background_image | img_url: 'master' }}'){% endif %};
+    background-size: cover;
+    background-position: center;
+    background-color: {{ settings.background_color }};
+    color: #ffffff;
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60px;
+  }
+
+  .announce-countdown-container {
+    display: flex;
+    margin-top: 5px;
+  }
+
+  .timer-container {
+    display: flex;
+  }
+
+  .announce-countdown-timer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 170px;
+  }
+
+  .announce-countdown .time-segment {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 20%;
+  }
+
+  .announce-countdown .time-value {
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    border-radius: 5px;
+    background: {{ settings.segment_background_color }};
+  }
+
+  .announce-countdown .time-label {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+  }
+
+  .announce-countdown-header {
+    padding: 10px 35px;
+  }
+
+  .announce-countdown .header-text {
+    font-size: 16px;
+  }
+
+  .announce-button {
+    background: #ffffff;
+    color: #000000;
+    font-size: 15px;
+    text-transform: uppercase;
+    width: 171px;
+    height: 43px;
+    border: none;
+    border-radius: 5px;
+    margin-left: 30px;
+    font-weight: 600;
+  }
+
+  .announce-close-button {
+    position: absolute;
+    top: 18px;
+    right: 30px;
+    cursor: pointer;
+    fill: #ffffff;
+  }
+
+  @media (max-width: 768px) {
+    .announce-countdown {
+        flex-direction: column;
+        height: 80px;
+    }
+
+    .announce-countdown-container {
+      flex-direction: column;
+    }
+
+    .announce-countdown .time-value {
+        font-size: 18px;
+    }
+
+    .announce-countdown .time-label {
+        font-size: 12px;
+    }
+
+    .announce-countdown-timer {
+        width: 60%;
+    }
+
+    .announce-countdown-header {
+        padding: 0px;
+    }
+
+    .announce-countdown .header-text {
+      font-size: 16px;
+    }
+
+    .announce-button {
+      margin: 0px;
+      width: 133px;
+      margin-left: 10px;
+      height: 30px;
+      font-size: 12px;
+    }
+
+    .announce-close-button {
+        position: absolute;
+        top: 28px;
+        right: 10px;
+        cursor: pointer;
+    }
+  }
+{% endstyle %}
+<a href="{{ settings.colletion_url }}">
+<div id="announce-campaign-countdown" class="announce-countdown">
+  <div class="announce-countdown-container">
+    <div class="announce-countdown-header">
+      <div class="header-text">
+        {{ settings.progress_text | replace: 'X', '<span id="announce-percent-remaining">00.0</span>' }}
+      </div>
+    </div>
+    <div class="timer-container">
+      <div class="announce-countdown-timer">
+        <div class="time-segment">
+          <div class="time-value"><span id="announce-days">00</span></div>
+          <div class="time-label"><span>DAYS</span></div>
+        </div>
+        <div class="time-segment">
+          <div class="time-value"><span id="announce-hours">00</span></div>
+          <div class="time-label"><span>HRS</span></div>
+        </div>
+        <div class="time-segment">
+          <div class="time-value"><span id="announce-minutes">00</span></div>
+          <div class="time-label"><span>MINS</span></div>
+        </div>
+        <div class="time-segment">
+          <div class="time-value"><span id="announce-seconds">00</span></div>
+          <div class="time-label"><span>SECS</span></div>
+        </div>
+      </div>
+      <button class="announce-button">{{ settings.button_text }}</button>
+    </div>
+  </div>
+  <div>
+    <svg
+      class="fa fa-close announce-close-button"
+      id="announce-close-button"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+    >
+      <path fill="none" d="M0 0h24v24H0z"/>
+      <path fill="{{ settings.font_color }}" d="M18.3 5.71a.996.996 0 0 0-1.41 0L12 10.59 7.11 5.7a.996.996 0 1 0-1.41 1.41L10.59 12 5.7 16.89a.996.996 0 1 0 1.41 1.41L12 13.41l4.89 4.89a.996.996 0 1 0 1.41-1.41L13.41 12l4.89-4.89a.996.996 0 0 0 0-1.4z"/>
+    </svg>
+  </div>
+</div>
+</a>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const startTime = new Date('{{ settings.start_time }}');
+    const endTime = new Date('{{ settings.end_time }}');
+    const startValue = parseInt('{{ settings.start_value }}') / 100;
+    const endValue = parseInt('{{ settings.end_value }}') / 100;
+    const timezone = '{{ settings.time_zone }}';
+
+    let timezoneOffset = 0;
+    switch (timezone) {
+      case 'PST':
+        timezoneOffset = 420;
+        break;
+      case 'EST':
+        timezoneOffset = 240;
+        break;
+      case 'UK':
+        timezoneOffset = 0;
+        break;
+      case 'Europe':
+        timezoneOffset = -120;
+        break;
+      default:
+        timezoneOffset = -480;
+    }
+    const newStartTime = getNewZoneTime(startTime, timezoneOffset);
+    const newEndTime = getNewZoneTime(endTime, timezoneOffset);
+
+    // Calculate total duration in minutes and value difference
+    const totalDurationMins = (endTime - startTime) / (60 * 1000);
+    const valueDifference = endValue - startValue;
+
+    // Calculate interval in minutes per 0.1 change
+    const intervalMins = Math.abs(totalDurationMins / (valueDifference * 10));
+
+    // Get the block and timer elements
+    let days,
+      hours,
+      minutes,
+      seconds = 0;
+    const daysSegment = document.getElementById('announce-days');
+    const hoursSegment = document.getElementById('announce-hours');
+    const minutesSegment = document.getElementById('announce-minutes');
+    const secondsSegment = document.getElementById('announce-seconds');
+    const countdownBlock = document.getElementById('announce-campaign-countdown');
+    const valueElement = document.getElementById('announce-percent-remaining');
+    const closeButton = document.getElementById('announce-close-button');
+    closeButton.addEventListener('click', function () {
+      console.log('CLICKED');
+      countdownBlock.style.display = 'none';
+    });
+
+    function formatNumber(number) {
+      return number < 10 ? `0${number}` : number;
+    }
+
+    function getNewZoneTime(oldTime, timezoneOffset) {
+      const newTime = new Date(oldTime.getTime() + timezoneOffset * 60000);
+      return newTime;
+    }
+
+    function updateCountdown() {
+      const currentTime = new Date();
+      const elapsedTime = (currentTime - newStartTime) / (60 * 1000);
+      const elapsedIntervals = Math.floor(elapsedTime / intervalMins);
+
+      // Determine if the value should increase or decrease
+      const newValue = startValue + (valueDifference > 0 ? elapsedIntervals : -elapsedIntervals) * 0.1;
+      if (valueElement){
+        valueElement.textContent = `${newValue.toFixed(1)}`;
+      }
+
+      const leftTime = newEndTime - currentTime + 1000;
+
+      const daysLeft = parseInt(leftTime / 86400000);
+      const hoursLeft = parseInt(leftTime / 3600000);
+      const minutesLeft = parseInt(leftTime / 60000);
+      const secondsLeft = parseInt(leftTime / 1000);
+
+      seconds = minutesLeft * 60;
+      seconds = secondsLeft - seconds;
+
+      minutes = hoursLeft * 60;
+      minutes = minutesLeft - minutes;
+
+      hours = daysLeft * 24;
+      hours = hoursLeft - hours < 0 ? 0 : hoursLeft - hours;
+
+      days = daysLeft;
+
+      daysSegment.textContent = formatNumber(days);
+      hoursSegment.textContent = formatNumber(hours);
+      minutesSegment.textContent = formatNumber(minutes);
+      secondsSegment.textContent = formatNumber(seconds);
+
+      // Check if the countdown has finished
+      if (currentTime >= newEndTime) {
+        clearInterval(updateInterval);
+        countdownBlock.style.display = 'none';
+      }
+    }
+
+    // Check if the current time is past the start time
+    if (new Date() > newStartTime) {
+      updateCountdown(); // Initial update
+      var updateInterval = setInterval(updateCountdown, 1000); // Set interval for updates
+    } else {
+      // Hide the block if the start time is in the future
+      countdownBlock.style.display = 'none';
+    }
+  });
+</script>

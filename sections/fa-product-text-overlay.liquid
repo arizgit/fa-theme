@@ -1,0 +1,1164 @@
+{%- render 'page-anchor' -%}
+
+{%- unless section.settings.full_width -%}
+  {%- render 'section-spacing-collapsing' -%}
+{%- endunless -%}
+
+<style>
+  #shopify-section-{{ section.id }} {
+    {%- if section.settings.full_width -%}
+      --section-outer-spacing-block: 0;
+    {%- endif -%}
+
+    --content-over-media-overlay: {{ section.settings.overlay_color.rgb }} / {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+
+    {%- if section.settings.allow_transparent_header -%}
+      margin-block-start: calc(-1 * var(--header-height) * var(--section-is-first));
+    {%- endif -%}
+  }  
+  /* #shopify-section-{{ section.id }} .content_container .prose.has-spacer > * {
+    margin: {{section.settings.space_bw_content_desk}}rem 0;
+  } */
+  {% if section.settings.use_custom_padding == true %}
+  @media only screen and (max-width:650px){
+    #shopify-section-{{ section.id }} .content_container {
+      padding-top: {{section.settings.padding_top_mobile}}rem;
+    }
+  }
+  {% endif %}
+  @media only screen and (max-width:650px){
+    #shopify-section-{{ section.id }} p.h1.title-fa {
+      line-height: 1.5;
+      margin-top: 0.5rem;
+    }
+    /* #shopify-section-{{ section.id }} .content_container .prose.has-spacer > * {
+      margin: {{section.settings.space_bw_content_mob}}rem 0;
+    } */
+  }
+  .content_container .prose.has-spacer > * {
+    margin: {{ section.settings.gap-bw-blocks-desk }}rem 0;
+  }
+  @media only screen and (max-width:650px){
+    .content_container .prose.has-spacer > * {
+      margin: {{ section.settings.gap-bw-blocks-mob }}rem 0;
+    }
+  }
+  #shopify-section-{{ section.id }} price-list {
+    font-size: 1.25rem;
+  }
+  #shopify-section-{{ section.id }} compare-at-price .money {
+    text-decoration: line-through;
+  }
+</style>
+<!-- h-- overlay link starts here  -->
+{% if section.settings.overlay_link != blank %}
+<a class="overlay_link-custom" href="{{ section.settings.overlay_link }}"></a>
+{% endif %}
+<div {% render 'section-properties' %} {% if section.settings.allow_transparent_header %}allow-transparent-header{% endif %}>
+  {%- capture class -%}content-over-media content-over-media--{{ section.settings.image_size }} {% if section.settings.full_width %}full-bleed{% else %}shadow-block rounded{% endif %}{%- endcapture -%}
+  {% if section.settings.gap-row-mobile != 0 %}
+    {% assign mobile_gap = '--gap-row-mobile:' | append: section.settings.gap-row-mobile | append: 'rem;' %}
+  {% endif %}
+  <image-banner reveal-on-scroll="true" {% if section.settings.enable_parallax %}parallax="0.3"{% endif %} {% render 'surface', class: class, text_color: section.settings.text_color, style: mobile_gap %}>
+    {%- if section.settings.image != blank -%}
+      {%- capture image_class -%}{% if section.settings.mobile_image != blank %}hidden sm:block{% endif %}{%- endcapture -%}
+      {%- capture sizes -%}{% if section.settings.full_width %}100vw{% else %}(max-width: 740px) calc(100vw - 40px), (max-width: 999px) calc(100vw - 64px), min({{ settings.page_width }}px, 100vw - 96px){% endif %}{%- endcapture -%}
+
+      {{- section.settings.image | image_url: width: section.settings.image.width | image_tag: loading: 'lazy', sizes: sizes, widths: '200,300,400,500,600,700,800,900,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200', class: image_class -}}
+
+      {%- if section.settings.mobile_image != blank -%}
+        {{- section.settings.mobile_image | image_url: width: section.settings.mobile_image.width | image_tag: loading: 'lazy', sizes: sizes, widths: '200,300,400,500,600,700,800,900,1000,1200,1400,1600', class: 'sm:hidden' -}}
+      {%- endif -%}
+    {%- else -%}
+      {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder' | replace: '<svg', '<svg preserveAspectRatio="xMinYMin slice"' }}
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="content_container {{ section.settings.mobile_text_position }} {{ section.settings.desktop_text_position }}" style="--content-over-media-content-max-width:{{ section.settings.content_max_width |  append: 'rem' }}; --content-over-media-content-max-width-mobile: {{ section.settings.content_max_width_mobile | append: '%' }};">
+        <div class="prose has-spacer">
+          {%- for block in section.blocks -%}
+            {%- case block.type -%}
+              {%- when 'subheading' -%}
+              {% if block.settings.subheading_hide == true %}
+                <style>
+                  @media only screen and (max-width:650px){
+                    #shopify-section-{{ section.id }} .subheading-fa {
+                      display: none;
+                    }
+                  }
+                </style>
+                {% endif %}
+                {%- if block.settings.text != blank -%}
+                  <p class="{{ block.settings.subheading_class }} subheading-fa" {{ block.shopify_attributes }}>{{ block.settings.text | escape }}</p>
+                {%- endif -%}
+
+              {%- when 'heading' -%}
+              {% if block.settings.heading_hide == true %}
+                <style>
+                  @media only screen and (max-width:650px){
+                    #shopify-section-{{ section.id }} .title-fa {
+                      display: none;
+                    }
+                  }
+                </style>
+                {% endif %}
+                <style>
+                  #shopify-section-{{ section.id }} .title-fa {
+                    font-size: {{block.settings.font_size_desk}}rem;
+                  }
+                  @media only screen and (max-width:650px){
+                    #shopify-section-{{ section.id }} .title-fa {
+                      font-size: {{block.settings.font_size_mob}}rem;
+                    }
+                  }
+                </style>
+                {%- if block.settings.text != blank -%}
+                  <p class="{{ block.settings.heading_tag }} title-fa" {% if settings.heading_apparition != 'none' %}reveal-on-scroll="true"{% endif %} {{ block.shopify_attributes }}>
+                    {%- render 'styled-text', content: block.settings.text, apparition_effect: true -%}
+                  </p>
+                {%- endif -%}
+
+              {%- when 'richtext' -%}
+              {% if block.settings.para_hide == true %}
+                <style>
+                  @media only screen and (max-width:650px){
+                    #shopify-section-{{ section.id }} .content-fa {
+                      display: none;
+                    }
+                  }
+                </style>
+                {% endif %}
+                {%- if block.settings.content != blank -%}
+                  <div class="{{ block.settings.content_class }} reduce-content content-fa" style="--reduce-content:{{ block.settings.content_margin | append: 'rem' }}" {{ block.shopify_attributes }}>
+                    {{- block.settings.content -}}
+                  </div>
+                {%- endif -%}
+
+              {%- when 'liquid' -%}
+                {%- if block.settings.liquid != blank -%}
+                  <div {{ block.shopify_attributes }}>
+                    {{- block.settings.liquid -}}
+                  </div>
+                {%- endif -%}
+
+              {%- when 'button' -%}
+                {%- if block.settings.text != blank -%}
+                  {%- assign btn_is_secondary = false -%}
+                  {%- assign btn_style = 'fill' -%}
+                  {%- case block.settings.style -%}
+                    {%- when 'secondary' -%}
+                      {%- assign btn_is_secondary = true -%}
+                    {%- when 'outline' -%}
+                      {%- assign btn_style = 'outline' -%}
+                  {%- endcase -%}
+                  {%- render 'button', content: block.settings.text, href: block.settings.url, size: block.settings.size, style: btn_style, secondary: btn_is_secondary, width: block.settings.width -%}
+                {%- endif -%}
+
+              {%- when 'price' -%}
+              {%- render 'price-list', variant: block.settings.product.selected_or_first_available_variant -%}
+              
+              {%- when 'spacer' -%}
+                <div class="spacer" style="--default-spacer:{{ block.settings.default_space |  append: 'rem'  }};--mobile-spacer:{{ block.settings.mobile_space |  append: 'rem' }}" {{ block.shopify_attributes }}></div>
+              {%- when 'icon-badge' -%}
+                {%- if block.settings.text != blank -%}
+                  {% render 'text-icon-badge', content: block.settings.text, icon: block.settings.icon %}
+                {%- endif -%}
+              {%- when 'play' -%}
+                {% liquid
+                  assign play_button_class = "video-play-button"
+                  assign play_button_class = play_button_class | append: ' video-play-button--' | append: block.settings.size
+                  if block.settings.animate == false
+                    assign play_button_class = play_button_class | append: ' video-play-button--static'
+                  endif
+                %}
+                <button class="{{ play_button_class }}" type="button" {{ block.shopify_attributes }} aria-controls="{{ block.id }}" aria-expanded="false">
+                  <span class="sr-only">{{ 'general.accessibility.play_video' | t }}</span>
+                  {%- render 'icon' with 'play-button', width: 48, height: 48 -%}
+                </button>
+                <x-drawer id="{{ block.id }}" class="drawer modal-window modal-window--video" open-from="bottom" template="modal">
+                  {%- if block.settings.video -%}
+                    <video-media autoplay style="--aspect-ratio: {{ block.settings.video.aspect_ratio }}">
+                      {{- block.settings.video | video_tag: playsinline: true, muted: true, loop: false, controls: true, preload: 'metadata', class: 'object-fill' -}}
+                    </video-media>
+                  {%- else -%}
+                    <video-media host="{{ block.settings.external_video_url.type }}" autoplay style="--aspect-ratio: 16/9">
+                      <template>
+                        {%- if block.settings.external_video_url.type == 'youtube' -%}
+                          <iframe src="https://www.youtube.com/embed/{{ block.settings.external_video_url.id }}?playsinline=1&autoplay=1&controls=0&mute=1&loop=1&playlist={{ block.settings.external_video_url.id }}&enablejsapi=1&rel=0&modestbranding=1&origin={{ 'https://' | append: request.host | url_encode }}" allow="autoplay; encrypted-media" allowfullscreen="allowfullscreen"></iframe>
+                        {%- elsif block.settings.external_video_url.type == 'vimeo' -%}
+                          <iframe src="https://player.vimeo.com/video/{{ block.settings.external_video_url.id }}?autoplay=1&autopause=1&background=1&loop=1&muted=1&transparent=0&responsive=1&portrait=0&title=0&byline=0&color={{ settings.text_color | remove_first: '#' }}" allow="autoplay; encrypted-media;" allowfullscreen="allowfullscreen"></iframe>
+                        {%- endif -%}
+                      </template>
+                    </video-media>
+                  {%- endif -%}
+                </x-drawer>
+            {%- endcase -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    {%- endif -%}
+  </image-banner>
+</div>
+
+{% schema %}
+{
+  "name": "Product with text (FA)",
+  "class": "shopify-section--product-with-text-fa",
+  "tag": "section",
+  "disabled_on": {
+    "templates": ["password"],
+    "groups": ["header", "custom.overlay"]
+  },
+  "max_blocks": 10,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "nav_anchor_label",
+      "label": "Nav anchor label",
+      "info": "Used to build dynamic nav, requires section nav anchor links"
+    },
+    {
+      "type": "url",
+      "id": "overlay_link",
+      "label": "Link for image overlay",
+      "info": "Add link here to make section clickable"
+    },
+    {
+      "type": "checkbox",
+      "id": "allow_transparent_header",
+      "label": "Allow transparent header",
+      "info": "This setting only applies when this section is the first one.",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_parallax",
+      "label": "Enable parallax effect",
+      "info": "Parallax crops images.",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "image_size",
+      "label": "Image size",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Original image ratio"
+        },
+        {
+          "value": "sm",
+          "label": "Small"
+        },
+        {
+          "value": "md",
+          "label": "Medium"
+        },
+        {
+          "value": "lg",
+          "label": "Large"
+        },
+        {
+          "value": "fill",
+          "label": "Fill screen"
+        }
+      ],
+      "info": "Choose \"Original image ratio\" to avoid image cropping. [Learn more](https://help.shopify.com/en/manual/online-store/images/theme-images#best-practices-for-slideshows-and-full-widtw-images)",
+      "default": "auto"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "3200 x 1600px .jpg recommended"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile image",
+      "info": "1300 x 1500px .jpg recommended. Default to desktop image."
+    },
+    {
+      "type": "header",
+      "content": "Layout options"
+    },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "label": "Content Area Max Width",
+      "info": "Set the max width of the content area over the media player.",
+      "max": 70,
+      "min": 10,
+      "step": 1,
+      "unit": "rem",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "content_max_width_mobile",
+      "label": "Content maximum width mobile",
+      "max": 100,
+      "min": 30,
+      "step": 1,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "gap-row-mobile",
+      "label": "Mobile padding",
+      "info": "Adjust for top and bottom alignment",
+      "default": 0,
+      "min": 0,
+      "max": 8,
+      "step": 0.5,
+      "unit": "rem"
+    },
+    {
+      "type": "range",
+      "id": "gap-bw-blocks-desk",
+      "label": "Gap between text blocks ( Desktop )",
+      "default": 0,
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "unit": "rem"
+    },
+    {
+      "type": "range",
+      "id": "gap-bw-blocks-mob",
+      "label": "Gap between text blocks ( Mobile )",
+      "default": 0,
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "unit": "rem"
+    },
+    {
+      "type": "select",
+      "id": "mobile_text_position",
+      "label": "Mobile content position",
+      "options": [
+        {
+          "value": "place-self-start text-start",
+          "label": "Top left"
+        },
+        {
+          "value": "place-self-start-center text-center",
+          "label": "Top center"
+        },
+        {
+          "value": "place-self-start-end text-end",
+          "label": "Top right"
+        },
+        {
+          "value": "place-self-center-start text-start",
+          "label": "Middle left"
+        },
+        {
+          "value": "place-self-center text-center",
+          "label": "Middle center"
+        },
+        {
+          "value": "place-self-center-end text-end",
+          "label": "Middle right"
+        },
+        {
+          "value": "place-self-end-start text-start",
+          "label": "Bottom left"
+        },
+        {
+          "value": "place-self-end-center text-center",
+          "label": "Bottom center"
+        },
+        {
+          "value": "place-self-end text-end",
+          "label": "Bottom right"
+        }
+      ],
+      "default": "place-self-center text-center"
+    },
+    {
+      "type": "select",
+      "id": "desktop_text_position",
+      "label": "Desktop content position",
+      "options": [
+        {
+          "value": "sm:place-self-start sm:text-start",
+          "label": "Top left"
+        },
+        {
+          "value": "sm:place-self-start-center sm:text-center",
+          "label": "Top center"
+        },
+        {
+          "value": "sm:place-self-start-end sm:text-end",
+          "label": "Top right"
+        },
+        {
+          "value": "sm:place-self-center-start sm:text-start",
+          "label": "Middle left"
+        },
+        {
+          "value": "sm:place-self-center sm:text-center",
+          "label": "Middle center"
+        },
+        {
+          "value": "sm:place-self-center-end sm:text-end",
+          "label": "Middle right"
+        },
+        {
+          "value": "sm:place-self-end-start sm:text-start",
+          "label": "Bottom left"
+        },
+        {
+          "value": "sm:place-self-end-center sm:text-center",
+          "label": "Bottom center"
+        },
+        {
+          "value": "sm:place-self-end sm:text-end",
+          "label": "Bottom right"
+        }
+      ],
+      "default": "sm:place-self-center sm:text-center"
+    },
+    {
+      "type": "header",
+      "content": "Custom top and bottom padding"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_custom_padding",
+      "label": "Use custom padding",
+      "info": "Selecting this option will disable the global vertical space and auto collapse. Required if you use the custom padding options below."
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Top Padding",
+      "info": "Desktop",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Bottom Padding",
+      "info": "Desktop",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Top Padding",
+      "info": "Mobile & tablet",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Bottom Padding",
+      "info": "Mobile & tablet",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color_scheme",
+      "id": "scheme",
+      "label": "Color Scheme"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Overlay",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 30
+    }
+  ],
+  "blocks": [
+    {
+      "type": "subheading",
+      "name": "Subheading",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Subheading"
+        },
+        {
+          "type": "select",
+          "id": "subheading_class",
+          "label": "Subheading style",
+          "options": [
+            {
+              "value": "text-eyebrow",
+              "label": "Eyebrow"
+            },
+            {
+              "value": "text-base",
+              "label": "Default"
+            },
+            {
+              "value": "bold",
+              "label": "Bold"
+            }
+          ],
+          "default": "text-eyebrow"
+        },
+        {
+          "type": "checkbox",
+          "label": "Hide on mobile",
+          "id": "subheading_hide",
+          "default": false
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "name": "Heading",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Heading"
+        },
+        {
+          "type": "select",
+          "id": "heading_tag",
+          "label": "Style",
+          "options": [
+            {
+              "value": "h0",
+              "label": "H0"
+            },
+            {
+              "value": "h1",
+              "label": "H1"
+            },
+            {
+              "value": "h2",
+              "label": "H2"
+            },
+            {
+              "value": "h3",
+              "label": "H3"
+            },
+            {
+              "value": "h4",
+              "label": "H4"
+            },
+            {
+              "value": "h5",
+              "label": "H5"
+            },
+            {
+              "value": "h6",
+              "label": "H6"
+            }
+          ],
+          "default": "h1"
+        },
+        {
+          "type": "range",
+          "id": "font_size_mob",
+          "label": "Mobile font size:",
+          "max": 10,
+          "min": 1,
+          "step": 0.5,
+          "unit": "rem",
+          "default": 2
+        },
+        {
+          "type": "range",
+          "id": "font_size_desk",
+          "label": "Desktop font size:",
+          "max": 10,
+          "min": 1,
+          "step": 0.5,
+          "unit": "rem",
+          "default": 2
+        },
+        {
+          "type": "checkbox",
+          "label": "Hide on mobile",
+          "id": "heading_hide",
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "Paragraph",
+      "type": "richtext",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Content",
+          "default": "<p>Use this text to share information about your brand with your customers. Describe a product, share announcements, or welcome customers to your store.</p>"
+        },
+        {
+          "type": "select",
+          "id": "content_class",
+          "label": "Content style",
+          "options": [
+            {
+              "value": "text-lg",
+              "label": "Large"
+            },
+            {
+              "value": "text-base",
+              "label": "Default"
+            },
+            {
+              "value": "text-sm",
+              "label": "Small"
+            },
+            {
+              "value": "text-xs",
+              "label": "Extra Small"
+            }
+          ],
+          "default": "text-base"
+        },
+        {
+          "type": "range",
+          "id": "content_margin",
+          "label": "Reduce width",
+          "info": "Adds margin to richtext area to reduce the width.",
+          "min": 0,
+          "max": 50,
+          "step": 1,
+          "unit": "rem",
+          "default": 0
+        },
+        {
+          "type": "checkbox",
+          "label": "Hide on mobile",
+          "id": "para_hide",
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "Price",
+      "type": "price",
+      "settings": [
+        {
+          "type": "product",
+          "label": "Select product for price:",
+          "id": "product"
+        }
+      ]
+    },
+    {
+      "name": "Liquid",
+      "type": "liquid",
+      "settings": [
+        {
+          "type": "liquid",
+          "id": "liquid",
+          "label": "Liquid",
+          "default": "<p>Use this text to output some custom Liquid code to include widget or dynamic code.</p>"
+        }
+      ]
+    },
+    {
+      "name": "Button",
+      "type": "button",
+      "settings": [
+        {
+          "type": "select",
+          "id": "size",
+          "label": "Button size",
+          "default": "base",
+          "options": [
+            {
+              "label": "Small",
+              "value": "sm"
+            },{
+              "label": "Default",
+              "value": "base"
+            },{
+              "label": "Large",
+              "value": "lg"
+            },{
+              "label": "X-large",
+              "value": "xl"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "width",
+          "label": "Button width",
+          "default": "base",
+          "options": [{
+            "label": "Default",
+            "value": "base"
+          },{
+            "label": "Medium",
+            "value": "md"
+          },{
+            "label": "Large",
+            "value": "lg"
+          },{
+            "label": "X-large",
+            "value": "xl"
+          }]
+        },
+        {
+          "type": "select",
+          "id": "style",
+          "label": "Button style",
+          "default": "fill",
+          "options": [{
+            "label":"Primary",
+            "value": "fill"
+          },{
+            "label":"Secondary",
+            "value":"secondary"
+          },{
+            "label":"Outline",
+            "value": "outline"
+          },{
+            "label":"Link",
+            "value": "link"
+          }]
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Button text"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Link"
+        }
+      ]
+    },
+    {
+      "type": "spacer",
+      "name": "Spacer",
+      "settings": [
+        {
+          "type": "range",
+          "id": "default_space",
+          "default": 1,
+          "step": 0.5,
+          "unit": "rem",
+          "label": "Default Screen Spacer",
+          "info": "Desktop",
+          "min": 0,
+          "max": 16
+        },
+        {
+          "type": "range",
+          "id": "mobile_space",
+          "default": 1,
+          "step": 0.5,
+          "unit": "rem",
+          "label": "Small Screen Spacer",
+          "info": "Mobile & Tablet",
+          "min": 0,
+          "max": 16
+        }
+      ]
+    },
+    {
+      "type": "icon-badge",
+      "name": "Icon Badge",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text"
+        },
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            {
+              "group": "Freak Athlete",
+              "label": "Six in One (polygon)",
+              "value": "six-in-one-polygon"
+            },
+            {
+              "group": "Freak Athlete",
+              "label": "Vertical Storage",
+              "value": "vertical-storage"
+            },
+            {
+              "group": "Freak Athlete",
+              "label": "Information",
+              "value": "information"
+            },
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "picto-coupon",
+              "label": "Coupon",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-percent",
+              "label": "Percent",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-gift",
+              "label": "Gift",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-star",
+              "label": "Star",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-like",
+              "label": "Like",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-building",
+              "label": "Building",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-love",
+              "label": "Love",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-award-gift",
+              "label": "Award gift",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-happy",
+              "label": "Happy",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-box",
+              "label": "Box",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-pin",
+              "label": "Pin",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-timer",
+              "label": "Timer",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-validation",
+              "label": "Validation",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-truck",
+              "label": "Truck",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-return",
+              "label": "Return",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-earth",
+              "label": "Earth",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-plane",
+              "label": "Plane",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-credit-card",
+              "label": "Credit card",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-lock",
+              "label": "Lock",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-shield",
+              "label": "Shield",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-secure-profile",
+              "label": "Secure profile",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-money",
+              "label": "Money",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-recycle",
+              "label": "Recycle",
+              "group": "Ecology"
+            },
+            {
+              "value": "picto-leaf",
+              "label": "Leaf",
+              "group": "Ecology"
+            },
+            {
+              "value": "picto-tree",
+              "label": "Tree",
+              "group": "Ecology"
+            },
+            {
+              "value": "picto-mobile-phone",
+              "label": "Mobile phone",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-phone",
+              "label": "Phone",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-chat",
+              "label": "Chat",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-customer-support",
+              "label": "Customer support",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-operator",
+              "label": "Operator",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-mailbox",
+              "label": "Mailbox",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-envelope",
+              "label": "Envelope",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-comment",
+              "label": "Comment",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-question",
+              "label": "Question",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-send",
+              "label": "Send",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-at-sign",
+              "label": "At sign",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-camera",
+              "label": "Camera",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-wifi",
+              "label": "WiFi",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-bluetooth",
+              "label": "Bluetooth",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-printer",
+              "label": "Printer",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-smart-watch",
+              "label": "Smart watch",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-coffee",
+              "label": "Coffee",
+              "group": "Food & Drink"
+            },
+            {
+              "value": "picto-burger",
+              "label": "Burger",
+              "group": "Food & Drink"
+            },
+            {
+              "value": "picto-beer",
+              "label": "Beer",
+              "group": "Food & Drink"
+            },
+            {
+              "value": "picto-target",
+              "label": "Target",
+              "group": "Other"
+            },
+            {
+              "value": "picto-document",
+              "label": "Document",
+              "group": "Other"
+            },
+            {
+              "value": "picto-jewelry",
+              "label": "Jewelry",
+              "group": "Other"
+            },
+            {
+              "value": "picto-music",
+              "label": "Music",
+              "group": "Other"
+            },
+            {
+              "value": "picto-file",
+              "label": "File",
+              "group": "Other"
+            },
+            {
+              "value": "picto-mask",
+              "label": "Mask",
+              "group": "Other"
+            },
+            {
+              "value": "picto-stop",
+              "label": "Stop",
+              "group": "Other"
+            }]
+        }
+      ]
+    },
+    {
+      "type": "play",
+      "name": "Play button modal",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "label": "Button size",
+          "id": "size",
+          "options": [{
+            "label": "Default",
+            "value": "default"
+          },{
+            "label": "Small",
+            "value": "small"
+          }]
+        },
+        {
+          "type": "checkbox",
+          "default": false,
+          "id": "animate",
+          "label": "Show animation"
+        },
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Video",
+          "info": "Replaces external video if both are set."
+        },
+        {
+          "type": "video_url",
+          "id": "external_video_url",
+          "accept": ["vimeo", "youtube"],
+          "label": "Video URL",
+          "default": "https://www.youtube.com/watch?v=_9VUPq3SxOc"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product with text (FA)",
+      "blocks": [
+        {
+          "type": "subheading",
+          "settings": {
+            "text": "Subheading"
+          }
+        },
+        {
+          "type": "heading",
+          "settings": {
+            "text": "Product with text",
+            "heading_tag": "h1"
+          }
+        },
+        {
+          "type": "richtext"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

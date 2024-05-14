@@ -1,0 +1,410 @@
+{%- if section.blocks.size > 0 -%}
+  {%- render 'page-anchor' -%}
+  {%- render 'section-spacing-collapsing' -%}
+
+  <div {% render 'section-properties', class: 'social-proof' %}>
+
+    {%- if section.settings.background_image != blank -%}
+      {%- assign image_class = 'background ' -%}
+      {%- assign extension = section.settings.background_image | split: '.' | last -%}
+      {%- if extension == 'svg' -%}
+        {%- assign image_class = image_class | append: 'background-svg ' -%}
+      {%- endif -%}
+      {%- assign opacity = section.settings.image_opacity | append: ".0" | divided_by: 100  -%}
+      {%- assign styles = '--opacity:' | append: opacity -%}
+      {{- section.settings.background_image | image_url: width: section.settings.background_image.width | image_tag: loading: 'lazy', sizes: '100vw', widths: '200,300,400,500,600,700,800,900,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200', class: image_class, style: styles -}}
+    {% endif %}
+
+    <div class="social-proof__top">
+      <div class="prose">
+        {%- if section.settings.subheading != blank -%}
+          <p class="{{ section.settings.subheading_class }} subheading-fa">{{ section.settings.subheading | escape }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.title_top != blank -%}
+          <p class="{{ section.settings.title_class }} title-fa">
+            {%- render 'styled-text', content: section.settings.title_top -%}
+          </p>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <div class="social-proof__items text-custom" style="--count:{{ section.blocks.size | times: 2 }};--size:{{ section.settings.display_desktop }};--size-mobile:{{ section.settings.display_mobile }};--ratio:{{ section.settings.image_aspect_ratio }};--text-color:{{ section.settings.card_text_color.rgb }};--background:{{ section.settings.card_overlay_color.rgb }};--marquee-animation-duration:{{ section.settings.animation_duration |  append: 's' }};">
+      <div class="social-proof__items-track">
+        <div class="social-proof__items-wrapper">
+          {% capture cards %}
+          {% for block in section.blocks %}
+            <div class="social-proof__item">
+              <div class="social-proof__item-image">
+                {%- if block.settings.image != blank -%}
+                  
+                  {%- assign width = block.settings.image.width | minus: 100 -%}
+                  {%- assign height = block.settings.image.height | minus: 100 -%}
+                  {%- if block.settings.image.aspect_ratio > 1 -%}
+                    {%- assign width = height -%}
+                  {%- else -%}
+                    {%- assign height = width -%}
+                  {%- endif -%}
+                  {%- capture sizes -%}(max-width: 699px) {{ 100 | divided_by: section.settings.display_mobile }}vw, {{ 100 | divided_by: section.settings.display_desktop }}vw{% endcapture %}
+
+                  {{- block.settings.image | image_url: width: width | image_tag: loading: 'lazy', sizes: sizes, widths: '200,300,400,500,600,700,800,1000' -}}
+                {%- else -%}
+                  {{- 'image' | placeholder_svg_tag: 'aspect-short placeholder' -}}
+                {%- endif -%}
+              </div>
+              <div class="social-proof__item-content">
+                <p class="h4">{{ block.settings.name }}</p>
+                <p class="text-eyebrow">{{ block.settings.label }}</p>
+              </div>
+            </div>
+          {% endfor %}
+          {% endcapture %}
+          {{ cards }}
+          {{ cards }}
+          {% if section.blocks.size < section.settings.display_desktop %}
+            {% assign loop = section.settings.display_desktop | minus: section.blocks.size | append: '.0' | divided_by: section.blocks.size | ceil %}
+            {% for i in (1..loop) %}
+              {{ cards }}
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="social-proof__bottom">
+      <div class="prose">
+        {%- if section.settings.title_bottom != blank -%}
+          <p class="{{ section.settings.title_class }} title-fa">
+            {%- render 'styled-text', content: section.settings.title_bottom -%}
+          </p>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+  {
+    "name": "Social proof (FA)",
+    "class": "shopify-section--social-proof",
+    "tag": "section",
+    "disabled_on": {
+      "groups": ["header", "custom.overlay"]
+    },
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "full_width",
+        "label": "Full width",
+        "default": true
+      },
+      {
+        "type": "color",
+        "id": "background_sectioned_boxed",
+        "label": "Section Background",
+        "info": "This background color is only applied if FULL WIDTH is deselected."
+      },
+      {
+        "type": "text",
+        "id": "nav_anchor_label",
+        "label": "Nav anchor label",
+        "info": "Used to build dynamic nav, requires section nav anchor links"
+      },
+      {
+        "type": "image_picker",
+        "id": "background_image",
+        "label": "Background image",
+        "info": "1125 x 2000px .jpg recommended"
+      },
+      {
+        "type": "range",
+        "default": 100,
+        "id": "image_opacity",
+        "label": "Background image opacity",
+        "min": 1,
+        "max": 100,
+        "step": 1
+      },
+      {
+        "type": "text",
+        "id": "subheading",
+        "label": "Subheading",
+        "default": "Subheading"
+      },
+      {
+        "type": "select",
+        "id": "subheading_class",
+        "label": "Subheading style",
+        "options": [
+          {
+            "value": "text-eyebrow",
+            "label": "Eyebrow"
+          },
+          {
+            "value": "text-base",
+            "label": "Default"
+          },
+          {
+            "value": "bold",
+            "label": "Bold"
+          }
+        ],
+        "default": "text-eyebrow"
+      },
+      {
+        "type": "text",
+        "id": "title_top",
+        "label": "Heading top",
+        "default": "Heading top"
+      },
+      {
+        "type": "text",
+        "id": "title_bottom",
+        "label": "Heading bottom",
+        "default": "Heading bottom"
+      },
+      {
+        "type": "select",
+        "id": "title_class",
+        "label": "Heading style",
+        "options": [
+          {
+            "value": "h0",
+            "label": "H0"
+          },
+          {
+            "value": "h1",
+            "label": "H1"
+          },
+          {
+            "value": "h2",
+            "label": "H2"
+          },
+          {
+            "value": "h3",
+            "label": "H3"
+          },
+          {
+            "value": "h4",
+            "label": "H4"
+          },
+          {
+            "value": "h5",
+            "label": "H5"
+          }
+        ],
+        "default": "h2"
+      },
+      {
+        "type": "range",
+        "id": "display_desktop",
+        "min": 4,
+        "max": 9,
+        "default": 5,
+        "step": 1,
+        "label": "Cards to display"
+      },
+      {
+        "type": "range",
+        "id": "display_mobile",
+        "min": 1,
+        "max": 3,
+        "default": 2,
+        "step": 1,
+        "label": "Cards to display in mobile"
+      },
+      {
+        "type": "range",
+        "default": 5,
+        "id": "animation_duration",
+        "label": "Animation duration",
+        "info": "Time per card",
+        "min": 0.2,
+        "max": 8,
+        "step": 0.2,
+        "unit": "s"
+      },
+      {
+        "type": "header",
+        "content": "Card style"
+      },
+      {
+        "type": "select",
+        "id": "image_aspect_ratio",
+        "label": "Image size",
+        "options": [
+          {
+            "value": "1",
+            "label": "Square (1:1)"
+          },
+          {
+            "value": "0.75",
+            "label": "Tall (2:3)"
+          }
+        ],
+        "default": "1"
+      },
+      {
+        "type": "header",
+        "content": "Custom top and bottom padding"
+      },
+      {
+        "type": "checkbox",
+        "id": "use_custom_padding",
+        "label": "Use custom padding",
+        "info": "Selecting this option will disable the global vertical space and auto collapse. Required if you use the custom padding options below."
+      },
+      {
+        "type": "range",
+        "id": "padding_top",
+        "default": 1,
+        "step": 0.5,
+        "unit": "rem",
+        "label": "Top Padding",
+        "info": "Desktop",
+        "min": 0,
+        "max": 16
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom",
+        "default": 1,
+        "step": 0.5,
+        "unit": "rem",
+        "label": "Bottom Padding",
+        "info": "Desktop",
+        "min": 0,
+        "max": 16
+      },
+      {
+        "type": "range",
+        "id": "padding_top_mobile",
+        "default": 1,
+        "step": 0.5,
+        "unit": "rem",
+        "label": "Top Padding",
+        "info": "Mobile & tablet",
+        "min": 0,
+        "max": 16
+      },
+      {
+        "type": "range",
+        "id": "padding_bottom_mobile",
+        "default": 1,
+        "step": 0.5,
+        "unit": "rem",
+        "label": "Bottom Padding",
+        "info": "Mobile & tablet",
+        "min": 0,
+        "max": 16
+      },
+      {
+        "type": "header",
+        "content": "Colors",
+        "info": "Gradient replaces solid colors when set."
+      },
+      {
+        "type": "color_scheme",
+        "id": "scheme",
+        "label": "Color Scheme"
+      },
+      {
+        "type": "color",
+        "id": "background",
+        "label": "Background"
+      },
+      {
+        "type": "color_background",
+        "id": "background_gradient",
+        "label": "Background gradient"
+      },
+      {
+        "type": "color",
+        "id": "text_color",
+        "label": "Text"
+      },
+      {
+        "type": "color",
+        "id": "card_text_color",
+        "label": "Card text",
+        "default": "#FFFFFF"
+      },
+      {
+        "type": "color",
+        "id": "card_overlay_color",
+        "label": "Card overlay",
+        "default": "#11171B"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "default",
+        "name": "Card",
+        "settings": [
+          {
+            "type": "image_picker",
+            "id": "image",
+            "label": "Image"
+          },
+          {
+            "type": "text",
+            "id": "name",
+            "label": "Name"
+          },
+          {
+            "type": "text",
+            "id": "label",
+            "label": "Title"
+          }
+        ]
+      }
+    ],
+    "presets": [
+      {
+        "name": "Social proof (FA)",
+        "blocks": [
+          {
+            "type": "default",
+            "settings": {
+              "image": "shopify:\/\/shop_images\/upper-body-fitness.jpg",
+              "name": "John Smith",
+              "label": "Fitness Trainer"
+            }
+          },
+          {
+            "type": "default",
+            "settings": {
+              "image": "shopify:\/\/shop_images\/fitness-model-with-hand-on-hip.jpg",
+              "name": "Jane Smith",
+              "label": "Yoga Instructor"
+            }
+          },
+          {
+            "type": "default",
+            "settings": {
+              "image": "shopify:\/\/shop_images\/fitness-workout.jpg",
+              "name": "John Smith",
+              "label": "Pro Athlete"
+            }
+          },
+          {
+            "type": "default",
+            "settings": {
+              "image": "shopify:\/\/shop_images\/resting-on-basketball-court.jpg",
+              "name": "John Smith",
+              "label": "Pro Athlete"
+            }
+          },
+          {
+            "type": "default",
+            "settings": {
+              "image": "shopify:\/\/shop_images\/jogger-gets-ready.jpg",
+              "name": "Jane Smith",
+              "label": "Yoga Instructor"
+            }
+          }
+        ]
+      }
+    ]
+  }
+  {% endschema %}

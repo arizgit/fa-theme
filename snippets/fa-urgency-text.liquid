@@ -1,0 +1,127 @@
+{%- comment -%}
+----------------------------------------------------------------------------------------------------------------------
+URGENCY TEXT
+----------------------------------------------------------------------------------------------------------------------
+
+This is used to display a message based on a time/date condition
+
+********************************************
+Supported variables
+********************************************
+
+* start_time: date time string format: dd/mm/yyyy hh:mm:ss
+* end_time: date time string format: dd/mm/yyyy hh:mm:ss
+* start_value: number
+* end_value: number
+* value_increment: string option: day | hour
+* hide_before_start: boolean
+* hide_after_end: boolean
+* start_message: liquid
+* active_message: liquid
+* end_message: liquid
+* settings: object
+{%- endcomment -%}
+{% liquid
+  if settings != blank
+    assign start_date = settings.start_time | date: '%s'
+    assign end_date = settings.end_time | date: '%s'
+    assign start_value = settings.start_value | default: 0
+    assign end_value = settings.end_value | default: 10
+    assign value_increment = settings.value_increment | default: 'day'
+    assign hide_before_start = settings.hide_before_start | default: false
+    assign hide_after_end = settings.hide_after_end | default: false
+    assign start_message = settings.start_message
+    assign active_message = settings.active_message
+    assign end_message = settings.end_message
+  else
+    assign start_date = start_time | date: '%s'
+    assign end_date = end_time | date: '%s'
+    assign start_value = start_value | default: 0
+    assign end_value = end_value | default: 10
+    assign value_increment = value_increment | default: 'day'
+    assign hide_before_start = hide_before_start | default: false
+    assign hide_after_end = hide_after_end | default: false
+  endif
+  # diff between start and end
+  assign current_date = 'now' | date: '%s'
+  assign diff = end_date | minus: start_date
+  assign diff_hours = diff | divided_by: 3600
+  assign diff_days = diff_hours | divided_by: 24
+  # diff between start and current
+  assign diff_start = start_date | minus: current_date
+  assign diff_start_hours = diff_start | append: '.0' | divided_by: 3600
+  assign diff_start_days = diff_start_hours | divided_by: 24
+  # diff between end and current
+  assign diff_end = end_date | minus: current_date
+  assign diff_end_hours = diff_end | divided_by: 3600
+  assign diff_end_days = diff_end_hours | divided_by: 24
+  # diff between start and end values
+  assign diff_value = end_value | minus: start_value
+  assign days_value_times = diff_start_days | abs | round
+  assign hours_value_times = diff_start_hours | abs | round
+  assign days_increment = diff_value | append: '.0' | divided_by: diff_days | round: 4
+  assign hours_increment = diff_value | append: '.0' | divided_by: diff_hours | round: 4
+  
+  case value_increment
+    when 'day'
+      assign temp = days_value_times | times: days_increment | plus: start_value
+    when 'hour'
+      assign temp = hours_value_times | times: hours_increment | plus: start_value
+  endcase
+
+  assign display_fraction = temp | round: 1
+  assign display_fraction_2 = temp | round: 2
+  assign display = temp | round: 0
+
+  if diff_start_hours > 0 and diff_start_hours < 1
+    assign start_hours = 'less than 1 hour'
+  else
+    assign diff_start_hours = diff_start_hours | round: 0
+    assign start_hour_label = diff_start_hours | pluralize: 'hour', 'hours'
+    assign start_hours = diff_start_hours | append: ' ' | append: start_hour_label
+  endif
+
+  if diff_start_days > 0 and diff_start_days < 1
+    assign start_days = 'less than 1 day'
+  else
+    assign diff_start_days = diff_start_days | round: 0
+    assign start_day_label = diff_start_days | pluralize: 'day', 'days'
+    assign start_days = diff_start_days | append: ' ' | append: start_day_label
+  endif
+
+  if diff_end_hours > 0 and diff_end_hours < 1
+    assign end_hours = 'less than 1 hour'
+  else
+    assign diff_end_hours = diff_end_hours | round: 0
+    assign end_hour_label = diff_end_hours | pluralize: 'hour', 'hours'
+    assign end_hours = diff_end_hours | append: ' ' | append: end_hour_label
+  endif
+
+  if diff_end_days > 0 and diff_end_days < 1
+    assign end_days = 'less than 1 day'
+  else
+    assign diff_end_days = diff_end_days | round: 0
+    assign end_day_label = diff_end_days | pluralize: 'day', 'days'
+    assign end_days = diff_end_days | append: ' ' | append: end_day_label
+  endif
+  
+  assign current_state = 'active'
+
+  if current_date > end_date
+    assign current_state = 'after'
+  endif
+
+  if current_date < start_date
+    assign current_state = 'before'
+  endif
+
+  case current_state
+    when 'before'
+      assign message = start_message
+    when 'after'
+      assign message = end_message
+    else
+      assign message = active_message
+  endcase
+%}
+{{ message | replace: '[end_days]', end_days |  replace: '[end_hours]', end_hours | replace: '[start_days]', start_days |  replace: '[start_hours]', start_hours | replace: '[display]', display |  replace: '[display_fraction]', display_fraction | replace: '[display_fraction_2]', display_fraction_2 }}

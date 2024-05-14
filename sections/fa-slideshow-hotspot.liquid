@@ -1,0 +1,1605 @@
+{%- render 'page-anchor' -%}
+
+{%- comment -%}
+------------------------------------------------------------------------------------------------------------------------
+CSS
+------------------------------------------------------------------------------------------------------------------------
+{%- endcomment -%}
+<style>
+  {%- assign controls_color = section.blocks.first.settings.text_color -%}
+
+  #shopify-section-{{ section.id }} {
+    --slideshow-background: {{ section.blocks.first.settings.background_gradient | default: section.blocks.first.settings.background | default: section.settings.background_gradient | default: section.settings.background }};
+    --slideshow-controls-background: {{ controls_background.rgb }};
+    --slideshow-controls-color: {{ controls_color.rgb }};
+
+    {%- if section.settings.allow_transparent_header -%}
+      margin-block-start: calc(-1 * var(--header-height) * var(--section-is-first));
+    {%- endif -%}
+
+    {%- if section.settings.use_custom_padding -%}
+    --section-padding-top: {{ section.settings.padding_top }}rem;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}rem;
+    --section-padding-top-mobile: {{ section.settings.padding_top_mobile }}rem;
+    --section-padding-bottom-mobile: {{ section.settings.padding_bottom_mobile }}rem;
+    {%- endif -%}
+
+    --hot-spot-background: {{ section.settings.hot_spot_dot_background.rgb }};
+    --hot-spot-text-color: {{ section.settings.hot_spot_dot_text_color.rgb }};
+  }
+
+  #shopify-section-{{ section.id }} .content-over-media {
+    overflow: visible; /* allows dot to show outside */
+  }
+
+  {%- if section.settings.full_width -%}
+    @media screen and (min-width: 1000px) {
+      #shopify-section-{{ section.id }} {
+        --section-spacing-block: 0;
+      }
+    }
+  {%- endif -%}
+
+  {%- for block in section.blocks -%}
+    #block-{{ block.id }} {
+      {%- assign controls_color = block.settings.text_color -%}
+      --slideshow-slide-background: {{ block.settings.background_gradient | default: block.settings.background | default: section.settings.background_gradient | default: section.settings.background }};
+      --slideshow-slide-controls-background: {{ controls_background.rgb }};
+      --slideshow-slide-controls-color: {{ controls_color.rgb }};
+    }
+
+    {%- for i in (1 .. 5) -%}
+    {%- liquid
+      assign position_horz = 'horizontal_position_' | append: i
+      assign position_vert = 'vertical_position_' | append: i
+      assign position_horz_mobile = 'horizontal_position_mobile_' | append: i
+      assign position_vert_mobile = 'vertical_position_mobile_' | append: i
+      assign title = 'title_' | append: i
+      assign content = 'content_' | append: i
+
+      if block.settings[title] == blank or block.settings[content] == blank
+        continue
+      endif
+    -%}
+
+    #block-{{ section.id }}-{{ block.id }}-{{ i }} {
+      --hot-spot-horizontal-position: {% if block.settings.mobile_image != blank %}{{ block.settings[position_horz_mobile] }}{% else %}{{ block.settings[position_horz] }}{% endif %}%;
+      --hot-spot-vertical-position: {% if block.settings.mobile_image != blank %}{{ block.settings[position_vert_mobile] }}{% else %}{{ block.settings[position_vert] }}{% endif %}%;
+    }
+
+    @media screen and (min-width: 700px) {
+      #block-{{ section.id }}-{{ block.id }}-{{ i }} {
+        --hot-spot-horizontal-position: {{ block.settings[position_horz] }}%;
+        --hot-spot-vertical-position: {{ block.settings[position_vert] }}%;
+      }
+    }
+    {%- endfor -%}
+  {%- endfor -%}
+</style>
+
+{%- comment -%}
+------------------------------------------------------------------------------------------------------------------------
+LIQUID
+------------------------------------------------------------------------------------------------------------------------
+{%- endcomment -%}
+
+{%- assign slideshow_id = 'slideshow-' | append: section.id -%}
+{%- assign tab_labels = '' -%}
+
+<x-slideshow data-control-type="tabs" class="slideshow {% unless section.settings.full_width %}slideshow--boxed{% if section.settings.use_custom_padding %} slideshow--space{% endif %}{% endunless %} {% if section.blocks.size > 1 %}slideshow--multiple-slides{% endif %}" {% if section.settings.allow_transparent_header %}allow-transparent-header{% endif %}>
+  {%- unless section.settings.full_width -%}
+    <span class="slideshow__slide-background"></span>
+  {%- endunless -%}
+
+  {%- assign tab_overlay_opacity = section.settings.tab_labeled_overlay_opacity | divided_by: 100.0 | append: ';' -%}
+  {%- assign tab_overlay_css_vars = "--tab-labeled-overlay-opacity:" | append: tab_overlay_opacity -%}
+  {%- if section.settings.tab_labeled_overlay != blank and section.settings.tab_labeled_overlay != 'rgba(0,0,0,0)' -%}
+    {%- assign tab_overlay_css_vars = tab_overlay_css_vars | append: "--tab-labeled-overlay   :" | append: section.settings.tab_labeled_overlay.rgb |  append: ';' -%}
+  {%- endif -%}
+  {%- if section.settings.tab_labeled_text != blank and section.settings.tab_labeled_text != 'rgba(0,0,0,0)' -%}
+    {%- assign tab_overlay_css_vars = tab_overlay_css_vars | append: "--tab-labeled-text:" | append: section.settings.tab_labeled_text.rgb |  append: ';' -%}
+  {%- endif -%}
+  {%- if section.settings.tab_labeled_active != blank and section.settings.tab_labeled_active != 'rgba(0,0,0,0)' -%}
+    {%- assign tab_overlay_css_vars = tab_overlay_css_vars | append: "--tab-labeled-active:" | append: section.settings.tab_labeled_active.rgb |  append: ';' -%}
+  {%- endif -%}
+  {%- if section.settings.tab_labeled_arrow != blank and section.settings.tab_labeled_arrow != 'rgba(0,0,0,0)' -%}
+    {%- assign tab_overlay_css_vars = tab_overlay_css_vars | append: "--tab-labeled-arrow:" | append: section.settings.tab_labeled_arrow.rgb |  append: ';' -%}
+  {%- endif -%}
+
+  <slideshow-carousel-hotspots id="{{ slideshow_id }}" style="{{ tab_overlay_css_vars }}" class="slideshow__carousel" reveal-on-scroll="true" selector=".slideshow__slide" transition="{{ section.settings.transition_type }}" {% if section.settings.autoplay %}autoplay="{{ section.settings.cycle_speed }}"{% endif %} role="region">
+    {% if section.settings.transition_type == 'video_transition' %}
+      <div class="slideshow__video-background {% unless section.settings.full_width %}rounded{% endunless %}" data-video-background>
+        {%- if section.settings.mobile_transition_video != blank -%}
+          <video-media class="sm:hidden" {% if section.settings.image_size == 'auto' %}style="--aspect-ratio: {{ section.settings.mobile_transition_video.aspect_ratio }}"{% endif %}>
+            {{- section.settings.mobile_transition_video | video_tag: class: 'object-cover sm:hidden', controls: false, playsinline: true, muted: true, loop: true, preload: 'metadata' -}}
+          </video-media>
+        {%- endif -%}
+
+        <video-media {% if section.settings.mobile_transition_video != blank %}class="hidden sm:block"{% endif %} {% if section.settings.image_size == 'auto' %}style="--aspect-ratio: {{ section.settings.transition_video.aspect_ratio }}"{% endif %}>
+          {{- section.settings.transition_video | video_tag: playsinline: true, preload: 'metadata', muted: true, loop: true, controls: false -}}
+        </video-media>
+      </div>
+    {% endif %}
+
+    {%- for block in section.blocks -%}
+      {%- assign tab_labels = tab_labels | append: block.settings.tab_label |  append: ',' -%}
+      {%- capture slide -%}
+        {%- assign overlay_opacity = block.settings.overlay_opacity | divided_by: 100.0 -%}
+        {%- assign styles = '--content-over-media-content-max-width:' | append: block.settings.content_max_width | append: 'rem;' -%}
+        {%- assign styles = styles | append: '--content-over-media-content-max-width-mobile:' | append: block.settings.content_max_width_mobile | append: '%;' -%}
+        {%- assign styles = styles | append: '--content-over-media-overlay:' | append: block.settings.overlay_color.rgb | append: '/' | append: overlay_opacity | append: ';' -%}
+        {% if block.settings.gap-row-mobile != 0 %}
+          {% assign styles = styles | append: '--gap-row-mobile:' | append: block.settings.gap-row-mobile | append: 'rem;' %}
+        {% endif %}
+        <div class="content-over-media content-over-media--{{ section.settings.image_size }} {% unless section.settings.full_width %}rounded{% endunless %}" style="{{ styles }}">
+          {%- comment -%}---------------- MEDIA ----------------{%- endcomment -%}
+          {%- capture sizes -%}{% if section.settings.full_width %}100vw{% else %}min({{ settings.page_width }}px, 100vw){% endif %}{%- endcapture -%}
+
+          {%- if block.settings.image != blank -%}
+            {%- capture loading_strategy -%}{% if forloop.first %}eager{% else %}lazy{% endif %}{%- endcapture -%}
+            {%- capture fetch_priority -%}{% if forloop.first %}high{% else %}low{% endif %}{%- endcapture -%}
+
+            {%- if block.settings.mobile_image == blank -%}
+              {{- block.settings.image | image_url: width: block.settings.image.width | image_tag: loading: loading_strategy, fetchpriority: fetch_priority, sizes: sizes, widths: '200,300,400,500,600,700,800,900,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200' -}}
+            {%- else -%}
+              {{- block.settings.image | image_url: width: block.settings.image.width | image_tag: loading: loading_strategy, fetchpriority: fetch_priority, sizes: sizes, widths: '200,300,400,500,600,700,800,900,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200', class: 'hidden sm:block' -}}
+              {{- block.settings.mobile_image | image_url: width: block.settings.mobile_image.width | image_tag: loading: loading_strategy, fetchpriority: fetch_priority, sizes: sizes, widths: '200,300,400,500,600,700,800,900,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200', class: 'sm:hidden' -}}
+            {%- endif -%}
+          {%- else -%}
+            {%- capture placeholder_image -%}{% cycle 'placeholder': 'lifestyle-1', 'lifestyle-2' %}{%- endcapture -%}
+            {{- placeholder_image | placeholder_svg_tag: 'placeholder' | replace: '<svg', '<svg preserveAspectRatio="xMinYMin slice"' -}}
+          {%- endif -%}
+
+          {%- comment -%}---------------- CONTENT ----------------{%- endcomment -%}
+          {%- capture content_class -%}{{ block.settings.mobile_text_position }} {{ block.settings.desktop_text_position }}{%- endcapture -%}
+
+          <div {% render 'surface', class: content_class, text_color: block.settings.text_color %}>
+            <div class="prose slideshow-prose">
+              {%- if block.settings.subheading != blank -%}
+                <p class="{{ block.settings.subheading_class }} subheading-fa" data-sequence="subheading">{{ block.settings.subheading | escape }}</p>
+              {%- endif -%}
+
+              {%- if block.settings.title != blank -%}
+                <p class="{{ block.settings.heading_tag }} title-fa" data-sequence="heading">
+                  {%- render 'styled-text', content: block.settings.title, apparition_effect: true -%}
+                </p>
+              {%- endif -%}
+
+              {%- if block.settings.content != blank -%}
+                <div class="{{ block.settings.content_class }} content-fa" data-sequence="content">
+                  {{- block.settings.content -}}
+                </div>
+              {%- endif -%}
+
+            </div>
+          </div>
+
+          {%- for i in (1 .. 5) -%}
+            {% liquid
+              assign hot_spot_style = 'small'
+              assign title = 'title_' | append: i
+              assign content = 'content_' | append: i
+              assign media = 'media_' | append: i
+              assign position_horz = 'horizontal_position_' | append: i
+              assign position_horz_mobile = 'horizontal_position_mobile_' | append: i
+              assign label_position = 'label_position_' | append: i
+              assign label_position_mobile = 'label_position_mobile_' | append: i
+              assign label_position_vertical = 'label_position_v_' | append: i
+              assign label_position_vertical_mobile = 'label_position_mv_' | append: i
+              assign hot_spot_class = 'hot-spot hot-spot--' | append: hot_spot_style | append: ' '
+
+              if block.settings[label_position_vertical] == 'top' and  block.settings[label_position] == 'default'
+                  assign lpv_class = 'label-vertical-top'
+              elsif block.settings[label_position_vertical] == 'top' and  block.settings[label_position] == 'start'
+                  assign lpv_class = 'label-vertical-top-left'
+              elsif block.settings[label_position_vertical] == 'top' and  block.settings[label_position] == 'end'
+                  assign lpv_class = 'label-vertical-top-right'
+              elsif block.settings[label_position_vertical] == 'bottom'  and block.settings[label_position] == 'default'
+                  assign lpv_class = 'label-vertical-bottom'
+              elsif block.settings[label_position_vertical] == 'bottom'  and block.settings[label_position] == 'start'
+                  assign lpv_class = 'label-vertical-bottom-left'
+              elsif block.settings[label_position_vertical] == 'bottom'  and block.settings[label_position] == 'end'
+                  assign lpv_class = 'label-vertical-bottom-right'
+              else 
+                assign lpv_class = ''
+              endif
+
+              if block.settings[label_position_vertical_mobile] == 'top' and  block.settings[label_position_mobile] == 'default'
+                  assign lpvm_class = 'label-vertical-mobile-top'
+              elsif block.settings[label_position_vertical_mobile] == 'top' and block.settings[label_position_mobile] == 'start'
+                  assign lpvm_class = 'label-vertical-mobile-top-left'
+              elsif block.settings[label_position_vertical_mobile] == 'top' and block.settings[label_position_mobile] == 'end'
+                  assign lpvm_class = 'label-vertical-mobile-top-right'
+              elsif block.settings[label_position_vertical_mobile] == 'bottom' and block.settings[label_position_mobile] == 'default'
+                  assign lpvm_class = 'label-vertical-mobile-bottom'
+              elsif block.settings[label_position_vertical_mobile] == 'bottom' and block.settings[label_position_mobile] == 'start'
+                  assign lpvm_class = 'label-vertical-mobile-bottom-left'
+              elsif block.settings[label_position_vertical_mobile] == 'bottom' and block.settings[label_position_mobile] == 'end'
+                  assign lpvm_class = 'label-vertical-mobile-bottom-right'
+              else
+                 assign lpvm_class = ''
+              endif
+                 
+              if block.settings[title] == blank or block.settings[content] == blank
+                continue
+              endif
+              
+              if section.settings.hot_spot_animation
+                assign hot_spot_class = hot_spot_class | append: 'hot-spot--static '
+              endif
+
+              if section.settings.hot_spot_animation
+                assign hot_spot_class = hot_spot_class | append: 'hot-spot--static '
+              endif
+
+              if block.settings[label_position_mobile] == 'default'
+                if block.settings[position_horz_mobile] < 50
+                  assign hot_spot_class = hot_spot_class | append: 'label-position--mobile-end '
+                else
+                  assign hot_spot_class = hot_spot_class | append: 'label-position--mobile-start '
+                endif
+              else
+                assign hot_spot_class = hot_spot_class | append: 'label-position--mobile-' | append: block.settings[label_position_mobile] | append: ' '
+              endif
+
+              if block.settings[label_position] == 'default'
+                if block.settings[position_horz] < 50
+                  assign hot_spot_class = hot_spot_class | append: 'label-position--end '
+                else
+                  assign hot_spot_class = hot_spot_class | append: 'label-position--start '
+                endif
+              else
+                assign hot_spot_class = hot_spot_class | append: 'label-position--' | append: block.settings[label_position] | append: ' '
+              endif
+            %}
+            
+            <div id="block-{{ section.id }}-{{ block.id }}-{{ i }}" class="{{ hot_spot_class  }}">
+              {%- capture popover_id -%}popover-{{ block.id }}-{{ i }}{%- endcapture -%}
+
+              <button type="button" aria-controls="{{ popover_id }}" aria-expanded="false" class="hot-spot__dot tap-area">
+                <span class="sr-only">{{ 'general.accessibility.read_more' | t }}</span>
+                {% if hot_spot_style == 'default' %}
+                  {%- render 'icon' with 'plus', width: 8, height: 8 -%}
+                {% endif %}
+              </button>
+
+              <button type="button" aria-controls="{{ popover_id }}" aria-expanded="false" class="hot-spot__label text-sm rounded-sm {{ lpv_class }} {{ lpvm_class }}"><span>{{ block.settings[title] | escape }}</span></button>
+
+              <x-drawer id="{{ popover_id }}" class="drawer modal-window" open-from="bottom" template="modal">
+                {%- assign half_width = settings.page_width |  divided_by: 2 -%}
+                {%- assign sizes = '(max-width: 699px) 100vw, ' | append: half_width | append: 'px' -%}
+                {%- assign widths = '200,300,400,500,' | append: half_width | append: ',' | append: settings.page_width -%}
+                {%- if block.settings[media] != blank -%}
+                <div slot="media">
+                  {{- block.settings[media] | image_url: width: block.settings[media].width | image_tag: loading: 'eager', widths: widths, sizes: sizes -}}
+                </div>
+                {%- endif -%}
+                {%- if block.settings[title] != blank -%}
+                  <span slot="header">{{ block.settings[title] | escape }}</span>
+                {%- endif -%}
+                {{- block.settings[content] -}}
+              </x-drawer>
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endcapture -%}
+      {%- liquid
+        if section.settings.transition_type == 'video_transition'
+          assign transition_data = 'data-play-start="' | append: block.settings.video_start | append: '" data-play-end="' | append: block.settings.video_end | append: '" '
+        endif
+      -%}
+
+      <div id="block-{{ block.id }}" {{ transition_data }} class="slideshow__slide {% if forloop.first %}is-selected{% endif %}" role="group" {{ block.shopify_attributes }}>
+        {{- slide -}}
+      </div>
+    {%- endfor -%}
+
+    {%- if section.blocks.size > 1 -%}
+      {%- assign classes = 'slideshow__controls ' -%}
+      {%- if section.blocks.size > 3 -%}
+        {%- assign classes = classes | append: 'slideshow__controls--compact' -%}
+      {%- endif -%}
+      <div class="{{ classes }}">
+        {%- assign tab_labels = tab_labels | remove_last: ',' | split: ',' -%}
+
+        <page-dots class="tab-labels" aria-controls="{{ slideshow_id }}">
+          {%- for i in (1..section.blocks.size) -%}
+            <button type="button" class="tab-label text-nav-link" aria-current="{% if forloop.first %}true{% else %}false{% endif %}">
+              <span class="tab-location text-sm">{{ i }}/{{ forloop.length  }}</span>
+              <span>{{ tab_labels[forloop.index0] }}</span>
+            </button>
+          {%- endfor -%}
+        </page-dots>
+
+      </div>
+
+      <button is="prev-button" aria-controls="{{ slideshow_id }}" class="tab-arrow-controls circle-button circle-button--sm circle-button--fill group">
+        <span class="sr-only">{{ 'general.accessibility.previous' | t }}</span>
+        <span class="animated-arrow animated-arrow-v2 animated-arrow--reverse"></span>
+      </button>
+
+      <button is="next-button" aria-controls="{{ slideshow_id }}" class="tab-arrow-controls circle-button circle-button--sm circle-button--fill group">
+        <span class="sr-only">{{ 'general.accessibility.next' | t }}</span>
+        <span class="animated-arrow animated-arrow-v2"></span>
+      </button>
+
+    {%- endif -%}
+  </slideshow-carousel-hotspots>
+</x-slideshow>
+
+{% schema %}
+{
+  "name": "Slideshow Hotspot (FA)",
+  "class": "shopify-section--slideshow-hotspot",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "custom.overlay"]
+  },
+  "max_blocks": 8,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "allow_transparent_header",
+      "label": "Allow transparent header",
+      "info": "This setting only applies when this section is the first one.",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "nav_anchor_label",
+      "label": "Nav anchor label",
+      "info": "Used to build dynamic nav, requires section nav anchor links"
+    },
+    {
+      "type": "video",
+      "id": "transition_video",
+      "label": "Video transition",
+      "info": "Required for transition type: video transition"
+    },
+    {
+      "type": "video",
+      "id": "mobile_transition_video",
+      "label": "Mobile video transition"
+    },
+    {
+      "type": "select",
+      "id": "image_size",
+      "label": "Media size",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Original media ratio"
+        },
+        {
+          "value": "sm",
+          "label": "Small"
+        },
+        {
+          "value": "md",
+          "label": "Medium"
+        },
+        {
+          "value": "lg",
+          "label": "Large"
+        },
+        {
+          "value": "fill",
+          "label": "Fill screen height"
+        }
+      ],
+      "info": "Choose \"Original media ratio\" to not cut media. [Learn more](https://help.shopify.com/en/manual/online-store/images/theme-images#best-practices-for-slideshows-and-full-width-images)",
+      "default": "auto"
+    },
+    {
+      "type": "select",
+      "id": "transition_type",
+      "label": "Transition type",
+      "options": [
+        {
+          "value": "fade",
+          "label": "Fade"
+        },
+        {
+          "value": "fade_with_text",
+          "label": "Fade with text transition"
+        },
+        {
+          "value": "video_transition",
+          "label": "Video transition"
+        }
+      ],
+      "default": "fade_with_text"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Auto rotate between slides",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "cycle_speed",
+      "min": 4,
+      "max": 20,
+      "step": 1,
+      "unit": "sec",
+      "label": "Change slides every",
+      "default": 6
+    },
+    {
+      "type": "header",
+      "content": "Custom top and bottom padding"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_custom_padding",
+      "label": "Use custom padding",
+      "info": "Selecting this option will disable the global vertical space and auto collapse. Required if you use the custom padding options below. Disabled if full width is enabled."
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Top Padding",
+      "info": "Desktop",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Bottom Padding",
+      "info": "Desktop",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Top Padding",
+      "info": "Mobile & tablet",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Bottom Padding",
+      "info": "Mobile & tablet",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "header",
+      "content": "Background",
+      "info": "When \"Full width\" is enabled, the background is shown while image is loading. You can override the background for each slide."
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#F2F2F2"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "header",
+      "content": "Labeled tab colors"
+    },
+    {
+      "type": "color",
+      "id": "tab_labeled_text",
+      "label": "Text"
+    },
+    {
+      "type": "color",
+      "id": "tab_labeled_active",
+      "label": "Active"
+    },
+    {
+      "type": "color",
+      "id": "tab_labeled_arrow",
+      "label": "Arrow"
+    },
+    {
+      "type": "color",
+      "id": "tab_labeled_overlay",
+      "label": "Background"
+    },
+    {
+      "type": "range",
+      "id": "tab_labeled_overlay_opacity",
+      "label": "Background opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "header",
+      "content": "Hot spot dot"
+    },
+    {
+      "type": "checkbox",
+      "id": "hot_spot_animation",
+      "label": "Hot spot animation",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "hot_spot_dot_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "hot_spot_dot_text_color",
+      "label": "Icon color",
+      "default": "#000000"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "info": "2800 x 1000px .jpg recommended",
+          "label": "Image"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Mobile image",
+          "info": "1200 x 1600px .jpg recommended"
+        },
+        {
+          "type": "header",
+          "content": "Video transition"
+        },
+        {
+          "type": "number",
+          "id": "video_start",
+          "label": "Start timestamp (secounds)",
+          "info": "Use decimal for fractions. Example: 0.5 is 15 frames in a 30fps video."
+        },
+        {
+          "type": "number",
+          "id": "video_end",
+          "label": "End timestamp (secounds)"
+        },
+        {
+          "type": "header",
+          "content": "Content"
+        },
+        {
+          "type": "range",
+          "id": "content_max_width",
+          "label": "Content maximum width",
+          "max": 70,
+          "min": 10,
+          "step": 1,
+          "unit": "rem",
+          "default": 40
+        },
+        {
+          "type": "range",
+          "id": "content_max_width_mobile",
+          "label": "Content maximum width mobile",
+          "max": 100,
+          "min": 30,
+          "step": 1,
+          "unit": "%",
+          "default": 100
+        },
+        {
+          "type": "range",
+          "id": "gap-row-mobile",
+          "label": "Mobile padding",
+          "info": "Adjust for top and bottom alignment",
+          "default": 0,
+          "min": 0,
+          "max": 8,
+          "step": 0.5,
+          "unit": "rem"
+        },
+        {
+          "type": "select",
+          "id": "mobile_text_position",
+          "label": "Mobile content position",
+          "options": [
+            {
+              "value": "place-self-start text-start",
+              "label": "Top left"
+            },
+            {
+              "value": "place-self-start-center text-center",
+              "label": "Top center"
+            },
+            {
+              "value": "place-self-start-end text-end",
+              "label": "Top right"
+            },
+            {
+              "value": "place-self-center-start text-start",
+              "label": "Middle left"
+            },
+            {
+              "value": "place-self-center text-center",
+              "label": "Middle center"
+            },
+            {
+              "value": "place-self-center-end text-end",
+              "label": "Middle right"
+            },
+            {
+              "value": "place-self-end-start text-start",
+              "label": "Bottom left"
+            },
+            {
+              "value": "place-self-end-center text-center",
+              "label": "Bottom center"
+            },
+            {
+              "value": "place-self-end text-end",
+              "label": "Bottom right"
+            }
+          ],
+          "default": "place-self-center text-center"
+        },
+        {
+          "type": "select",
+          "id": "desktop_text_position",
+          "label": "Desktop content position",
+          "options": [
+            {
+              "value": "sm:place-self-start sm:text-start",
+              "label": "Top left"
+            },
+            {
+              "value": "sm:place-self-start-center sm:text-center",
+              "label": "Top center"
+            },
+            {
+              "value": "sm:place-self-start-end sm:text-end",
+              "label": "Top right"
+            },
+            {
+              "value": "sm:place-self-center-start sm:text-start",
+              "label": "Middle left"
+            },
+            {
+              "value": "sm:place-self-center sm:text-center",
+              "label": "Middle center"
+            },
+            {
+              "value": "sm:place-self-center-end sm:text-end",
+              "label": "Middle right"
+            },
+            {
+              "value": "sm:place-self-end-start sm:text-start",
+              "label": "Bottom left"
+            },
+            {
+              "value": "sm:place-self-end-center sm:text-center",
+              "label": "Bottom center"
+            },
+            {
+              "value": "sm:place-self-end sm:text-end",
+              "label": "Bottom right"
+            }
+          ],
+          "default": "sm:place-self-center sm:text-center"
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "Tell your story"
+        },
+        {
+          "type": "select",
+          "id": "subheading_class",
+          "label": "Subheading style",
+          "options": [
+            {
+              "value": "text-eyebrow",
+              "label": "Eyebrow"
+            },
+            {
+              "value": "text-base",
+              "label": "Default"
+            },
+            {
+              "value": "bold",
+              "label": "Bold"
+            }
+          ],
+          "default": "text-eyebrow"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Slide title"
+        },
+        {
+          "type": "select",
+          "id": "heading_tag",
+          "label": "Heading size",
+          "options": [
+            {
+              "value": "h0",
+              "label": "H0"
+            },
+            {
+              "value": "h1",
+              "label": "H1"
+            },
+            {
+              "value": "h2",
+              "label": "H2"
+            },
+            {
+              "value": "h3",
+              "label": "H3"
+            },
+            {
+              "value": "h4",
+              "label": "H4"
+            },
+            {
+              "value": "h5",
+              "label": "H5"
+            },
+            {
+              "value": "h6",
+              "label": "H6"
+            }
+          ],
+          "default": "h0"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Content"
+        },
+        {
+          "type": "select",
+          "id": "content_class",
+          "label": "Content style",
+          "options": [
+            {
+              "value": "text-lg",
+              "label": "Large"
+            },
+            {
+              "value": "text-base",
+              "label": "Default"
+            },
+            {
+              "value": "text-sm",
+              "label": "Small"
+            },
+            {
+              "value": "text-xs",
+              "label": "Extra Small"
+            }
+          ],
+          "default": "text-base"
+        },
+        {
+          "type": "text",
+          "id": "tab_label",
+          "label": "Tab Label",
+          "info": "Only displayed if Controls use Labeled tabs.",
+          "default": "Tab Label Here"
+        },
+        {
+          "type": "header",
+          "content": "Hot spots"
+        },
+        {
+          "type": "paragraph",
+          "content": "-------- Hot spot #1 --------"
+        },
+        {
+          "type": "range",
+          "id": "horizontal_position_1",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Horizontal position",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "vertical_position_1",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Vertical position",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "horizontal_position_mobile_1",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Horizontal position (mobile image)",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "vertical_position_mobile_1",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Vertical position (mobile image)",
+          "default": 30
+        },
+        {
+          "type": "select",
+          "id": "label_position_1",
+          "label": "Label position",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Left",
+              "value": "start"
+            },
+            {
+              "label": "Right",
+              "value": "end"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "label_position_v_1",
+          "label": "Label position vertical",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Top",
+              "value": "top"
+            },
+            {
+              "label": "Bottom",
+              "value": "bottom"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "label_position_mobile_1",
+          "label": "Mobile label position",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Left",
+              "value": "start"
+            },
+            {
+              "label": "Right",
+              "value": "end"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "label_position_mv_1",
+          "label": "Label position mobile vertical",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Top",
+              "value": "top"
+            },
+            {
+              "label": "Bottom",
+              "value": "bottom"
+            }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "label": "Image",
+          "id": "media_1"
+        },
+        {
+          "type": "text",
+          "id": "title_1",
+          "label": "Heading"
+        },
+        {
+          "type": "richtext",
+          "id": "content_1",
+          "label": "Content"
+        },
+        {
+          "type": "paragraph",
+          "content": "-------- Hot spot #2 --------"
+        },
+        {
+          "type": "range",
+          "id": "horizontal_position_2",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Horizontal position",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "vertical_position_2",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Vertical position",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "horizontal_position_mobile_2",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Horizontal position (mobile image)",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "vertical_position_mobile_2",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Vertical position (mobile image)",
+          "default": 30
+        },
+        {
+          "type": "select",
+          "id": "label_position_2",
+          "label": "Label position",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Left",
+              "value": "start"
+            },
+            {
+              "label": "Right",
+              "value": "end"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "label_position_v_2",
+          "label": "Label position vertical",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Top",
+              "value": "top"
+            },
+            {
+              "label": "Bottom",
+              "value": "bottom"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "label_position_mobile_2",
+          "label": "Mobile label position",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Left",
+              "value": "start"
+            },
+            {
+              "label": "Right",
+              "value": "end"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "label_position_mv_2",
+          "label": "Label position Mobile vertical",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Top",
+              "value": "top"
+            },
+            {
+              "label": "Bottom",
+              "value": "bottom"
+            }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "label": "Image",
+          "id": "media_2"
+        },
+        {
+          "type": "text",
+          "id": "title_2",
+          "label": "Heading"
+        },
+        {
+          "type": "richtext",
+          "id": "content_2",
+          "label": "Content"
+        },
+        {
+          "type": "paragraph",
+          "content": "-------- Hot spot #3 --------"
+        },
+        {
+          "type": "range",
+          "id": "horizontal_position_3",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Horizontal position",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "vertical_position_3",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Vertical position",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "horizontal_position_mobile_3",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Horizontal position (mobile image)",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "vertical_position_mobile_3",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Vertical position (mobile image)",
+          "default": 30
+        },
+        {
+          "type": "select",
+          "id": "label_position_3",
+          "label": "Label position",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Left",
+              "value": "start"
+            },
+            {
+              "label": "Right",
+              "value": "end"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "label_position_v_3",
+          "label": "Label position vertical",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Top",
+              "value": "top"
+            },
+            {
+              "label": "Bottom",
+              "value": "bottom"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "label_position_mobile_3",
+          "label": "Mobile label position",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Left",
+              "value": "start"
+            },
+            {
+              "label": "Right",
+              "value": "end"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "label_position_mv_3",
+          "label": "Label position mobile vertical",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Top",
+              "value": "top"
+            },
+            {
+              "label": "Bottom",
+              "value": "bottom"
+            }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "label": "Image",
+          "id": "media_3"
+        },
+        {
+          "type": "text",
+          "id": "title_3",
+          "label": "Heading"
+        },
+        {
+          "type": "richtext",
+          "id": "content_3",
+          "label": "Content"
+        },
+        {
+          "type": "paragraph",
+          "content": "-------- Hot spot #4 --------"
+        },
+        {
+          "type": "range",
+          "id": "horizontal_position_4",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Horizontal position",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "vertical_position_4",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Vertical position",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "horizontal_position_mobile_4",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Horizontal position (mobile image)",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "vertical_position_mobile_4",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Vertical position (mobile image)",
+          "default": 30
+        },
+        {
+          "type": "select",
+          "id": "label_position_4",
+          "label": "Label position",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Left",
+              "value": "start"
+            },
+            {
+              "label": "Right",
+              "value": "end"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "label_position_v_4",
+          "label": "Label position vertical",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Top",
+              "value": "top"
+            },
+            {
+              "label": "Bottom",
+              "value": "bottom"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "label_position_mobile_4",
+          "label": "Mobile label position",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Left",
+              "value": "start"
+            },
+            {
+              "label": "Right",
+              "value": "end"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "label_position_mv_4",
+          "label": "Label position mobile vertical",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Top",
+              "value": "top"
+            },
+            {
+              "label": "Bottom",
+              "value": "bottom"
+            }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "label": "Image",
+          "id": "media_4"
+        },
+        {
+          "type": "text",
+          "id": "title_4",
+          "label": "Heading"
+        },
+        {
+          "type": "richtext",
+          "id": "content_4",
+          "label": "Content"
+        },
+        {
+          "type": "paragraph",
+          "content": "-------- Hot spot #5 --------"
+        },
+        {
+          "type": "range",
+          "id": "horizontal_position_5",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Horizontal position",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "vertical_position_5",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Vertical position",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "horizontal_position_mobile_5",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Horizontal position (mobile image)",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "vertical_position_mobile_5",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "label": "Vertical position (mobile image)",
+          "default": 30
+        },
+        {
+          "type": "select",
+          "id": "label_position_5",
+          "label": "Label position",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Left",
+              "value": "start"
+            },
+            {
+              "label": "Right",
+              "value": "end"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "label_position_v_5",
+          "label": "Label position vertical",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Top",
+              "value": "top"
+            },
+            {
+              "label": "Bottom",
+              "value": "bottom"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "label_position_mobile_5",
+          "label": "Mobile label position",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "None",
+              "value": "none"
+            },
+            {
+              "label": "Left",
+              "value": "start"
+            },
+            {
+              "label": "Right",
+              "value": "end"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "label_position_mv_5",
+          "label": "Label position mobile vertical",
+          "default": "default",
+          "options": [
+            {
+              "label": "Default",
+              "value": "default"
+            },
+            {
+              "label": "Top",
+              "value": "top"
+            },
+            {
+              "label": "Bottom",
+              "value": "bottom"
+            }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "label": "Image",
+          "id": "media_5"
+        },
+        
+        {
+          "type": "text",
+          "id": "title_5",
+          "label": "Heading"
+        },
+        {
+          "type": "richtext",
+          "id": "content_5",
+          "label": "Content"
+        },
+        {
+          "type": "header",
+          "content": "Slide colors"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text",
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "overlay_color",
+          "label": "Overlay",
+          "default": "#000000"
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "label": "Overlay opacity",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "default": 30
+        },
+        {
+          "type": "header",
+          "content": "Background",
+          "info": "Disable the \"Full width\" setting at the slideshow level to show background."
+        },
+        {
+          "type": "color",
+          "id": "background",
+          "label": "Background"
+        },
+        {
+          "type": "color_background",
+          "id": "background_gradient",
+          "label": "Background gradient"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Slideshow Hotspot (FA)",
+      "blocks": [
+        {
+          "type": "image",
+          "settings": {
+            "title": "Slide 1"
+          }
+        },
+        {
+          "type": "image",
+          "settings": {
+            "title": "Slide 2"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

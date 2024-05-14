@@ -1,0 +1,254 @@
+{%- render 'section-spacing-collapsing' -%}
+
+<style>
+  #shopify-section-{{ section.id }} {
+    --blog-posts-per-row: {{ section.settings.posts_count | default: 3 | at_least: 2 | at_most: section.settings.posts_count | at_most: 3 }};
+    --blog-posts-grid: auto / minmax(0, 1fr));      
+  }
+  
+
+  @media screen and (min-width: 700px) {
+    #shopify-section-{{ section.id }} {
+      --blog-posts-grid: auto / repeat(var(--blog-posts-per-row), minmax(0, 1fr));
+    }   
+    #shopify-section-{{ section.id }} .section {
+      padding-top: 0;
+    }
+  }
+
+  @media screen and (min-width: 1000px) {
+    #shopify-section-{{ section.id }} {
+      --blog-posts-grid: auto / repeat(var(--blog-posts-per-row), minmax(0, 1fr));
+    }
+  }
+  .custom-blog-posts-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .custom-blog-posts-pagination .page {
+    width: max-content;
+    max-width: max-content;
+    display: block;
+    margin: 0;
+    padding: 0.5rem;
+  }
+  a.paginate-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem;
+  }
+  a.paginate-icon svg {
+    width: 1.2rem;
+    height: auto;
+  }
+  a.paginate-icon.prev svg {
+    transform: rotate(180deg);
+  }
+  .custom-blog-posts-pagination a, .custom-blog-posts-pagination span {
+    color: #52626C;
+    padding: 0.5rem;
+  }
+  .custom-blog-posts-pagination span.active {
+    background: #F15729;
+    color: #fff;
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+</style>
+
+<div {% render 'section-properties' %}>
+  <div class="section-stack">
+    {%- render 'section-header',
+      subheading: section.settings.subheading,
+      heading: section.settings.title,
+      heading_color: section.settings.heading_color,
+      heading_gradient: section.settings.heading_gradient,
+      content: section.settings.content,
+      link_text: section.settings.link_text,
+      link_url: section.settings.link_url
+    -%}
+    {% paginate section.settings.blog.articles by 6 %}
+      <div class="blog-posts {% unless section.blocks.first.settings.stack_items %}scroll-area bleed md:unbleed{% endunless %}">
+        {%- capture sizes -%}(max-width: 699px) calc(100vw - 40px), (max-width: 999px) calc(100vw / 3 - 64px), calc(min(100vw - 96px, {{ settings.page_width }}px) / {{ block.settings.blog.articles_count | at_most: 3 }}){%- endcapture -%}
+        {% for article in section.settings.blog.articles -%}
+          {%- render 'blog-post-card-custom',
+            article: article,
+            show_excerpt: section.settings.show_excerpt,
+            show_date: section.settings.show_date,
+            show_author: section.settings.show_author,
+            show_comments_count: section.settings.show_comments_count,
+            show_category: section.settings.show_category,
+            sizes: sizes
+          -%}
+        {%- endfor %}
+      </div>
+      <div class="custom-blog-posts-pagination">
+        {% paginate section.settings.blog.articles by 6 -%}
+          {% if paginate.previous %}
+            <a class="paginate-icon prev" href="{{ paginate.previous.url }}">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 12H19" stroke="#52626C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 5L19 12L12 19" stroke="#52626C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          {% endif %}
+          {% for part in paginate.parts -%}
+            {% if part.is_link -%}
+              {{ part.title | link_to: part.url }}
+            {%- else -%}
+              <span class="active">{{ part.title }}</span>
+            {% endif %}
+          {%- endfor %}
+          {% if paginate.next %}
+            <a class="paginate-icon next" href="{{ paginate.next.url }}">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 12H19" stroke="#52626C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 5L19 12L12 19" stroke="#52626C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          {% endif %}
+        {%- endpaginate %}
+      </div>
+    {% endpaginate %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": " (FA)",
+  "class": "shopify-section--blog-posts-fa",
+  "tag": "section",
+  "disabled_on": {
+    "templates": ["password"],
+    "groups": ["header", "custom.overlay"]
+  },
+  "settings": [
+    {
+          "type": "blog",
+          "id": "blog",
+          "label": "Blog"
+        },
+        {
+          "type": "range",
+          "id": "posts_count",
+          "min": 2,
+          "max": 6,
+          "label": "Posts to show",
+          "default": 3
+        },
+        {
+          "type": "checkbox",
+          "id": "stack_items",
+          "label": "Stack on mobile",
+          "default": false
+        },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_excerpt",
+      "label": "Show excerpt",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_date",
+      "label": "Show date",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_author",
+      "label": "Show author",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_comments_count",
+      "label": "Show comments count",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_category",
+      "label": "Show category",
+      "info": "Add tag organize blog posts [Learn more](https://help.shopify.com/en/manual/online-store/blogs/writing-blogs#add-tags-to-a-blog-post).",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Blog posts"
+    },
+    {
+      "type": "richtext",
+      "id": "content",
+      "label": "Content"
+    },
+    {
+      "type": "url",
+      "id": "link_url",
+      "label": "Link URL"
+    },
+    {
+      "type": "text",
+      "id": "link_text",
+      "label": "Link text",
+      "default": "View all"
+    },
+    {
+      "type": "header",
+      "content": "Colors",
+      "info": "Gradient replaces solid colors when set."
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color"
+    },
+    {
+      "type": "color_background",
+      "id": "heading_gradient",
+      "label": "Heading gradient"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog posts (FA)",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}

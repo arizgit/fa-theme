@@ -1,0 +1,736 @@
+{%- unless section.settings.full_width -%}
+  {%- render 'section-spacing-collapsing' -%}
+{%- endunless -%}
+
+<style>
+  #shopify-section-{{ section.id }} {
+    {%- if section.settings.full_width -%}
+      --section-outer-spacing-block: 0;
+    {%- endif -%}
+
+    --content-over-media-overlay: {{ section.settings.overlay_color.rgb }} / {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+
+    {%- if section.settings.allow_transparent_header -%}
+      margin-block-start: calc(-1 * var(--header-height) * var(--section-is-first));
+    {%- endif -%}
+    position: relative;
+  }
+
+  @media screen and (min-width: 769px) {
+    #shopify-section-{{ section.id }} {
+      height: 600px;
+    }
+    #shopify-section-{{ section.id }} .text-container {
+      width: 35%;
+      margin-top: 78px;
+    }
+    #shopify-section-{{ section.id }} .text-container .heading {
+      margin-top: 86px;
+    }
+    #shopify-section-{{ section.id }} .badge-container {
+      top: {{ section.settings.badge_desktop_top }}%;
+      left: {{ section.settings.badge_desktop_left }}%;
+    }
+    #shopify-section-{{ section.id }} .badge-container p {
+      font-size: 28px;
+      margin-left: 20px;
+    }
+  }
+
+  @media screen and (min-width: 1200px) {
+    #shopify-section-{{ section.id }} {
+      height: 700px;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    #shopify-section-{{ section.id }} {
+      background-image: url({{ section.settings.mobile_image | img_url: 'master' }});
+      height: 738px;
+      background-size: 100% 100%;
+    }
+    #shopify-section-{{ section.id }} .image-container {
+      display: none;
+    }
+    #shopify-section-{{ section.id }} .text-container .subheading {
+      display: none;
+    }
+    #shopify-section-{{ section.id }} .text-container .text {
+      display: none;
+    }
+    #shopify-section-{{ section.id }} .text-container .heading {
+      width: 319px;
+    }
+    #shopify-section-{{ section.id }} .text-container .prose {
+      display: flex;
+      justify-content: center;
+    }
+    #shopify-section-{{ section.id }} .badge-container {
+      flex-direction: column;
+      top: {{ section.settings.badge_mobile_top }}%;
+      left: {{ section.settings.badge_mobile_left }}%;
+    }
+    #shopify-section-{{ section.id }} .badge-container p {
+      font-size: 16px;
+      margin-top: 10px;
+    }
+  }
+
+  #shopify-section-{{ section.id }} .text-container .heading {
+    font-size: 32px;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+
+  #shopify-section-{{ section.id }} .badge-container {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    z-index: 5;
+  }
+
+  #shopify-section-{{ section.id }} .badge-container svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  #shopify-section-{{ section.id }} .badge-container img {
+    width: 40px;
+  }
+
+  .image-container {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 60%; /* Adjust based on your design needs */
+    height: 100%;
+    clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%);
+    overflow: hidden;
+  }
+
+  .image-container img {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+  }
+</style>
+
+<div {% render 'section-properties' %} {% if section.settings.allow_transparent_header %}allow-transparent-header{% endif %}>
+  <div class="badge-container">
+    {% if section.settings.badge_icon != blank %}
+      {% render 'icon' with section.settings.badge_icon %}
+    {% else %}
+      <img src="{{ section.settings.custom_badge_icon | image_url }}" />
+    {% endif %}
+    <p>{{ section.settings.badge_text }}</p>
+  </div>
+  <div class="image-container">
+    {% if section.settings.image != blank %}<img src="{{ section.settings.image | image_url }}">{% endif %}
+  </div>
+  {%- if section.blocks.size > 0 -%}
+    <div class="text-container">
+      <div class="prose">
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when 'subheading' -%}
+              {%- if block.settings.text != blank -%}
+                <p class="bold" {{ block.shopify_attributes }} class="subheading">{{ block.settings.text | escape }}</p>
+              {%- elsif block.settings.subheading_image != blank -%}
+                <img class="subheading" src="{{ block.settings.subheading_image | image_url }}" >
+              {%- endif -%}
+            {%- when 'heading' -%}
+              {%- if block.settings.text != blank -%}
+                <{{ block.settings.heading_tag }} class="heading">{{ block.settings.text }}</{{ block.settings.heading_tag }}>
+              {%- endif -%}
+
+            {%- when 'richtext' -%}
+              {%- if block.settings.content != blank -%}
+                <div {{ block.shopify_attributes }} class="text">
+                  {{- block.settings.content -}}
+                </div>
+              {%- endif -%}
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Hero With Image(FA)",
+  "class": "shopify-section--hero-with-image",
+  "tag": "section",
+  "disabled_on": {
+    "templates": ["password"],
+    "groups": ["header", "custom.overlay"]
+  },
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "allow_transparent_header",
+      "label": "Allow transparent header",
+      "info": "This setting only applies when this section is the first one.",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_parallax",
+      "label": "Enable parallax effect",
+      "info": "Parallax crops images.",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "image_size",
+      "label": "Image size",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Original image ratio"
+        },
+        {
+          "value": "sm",
+          "label": "Small"
+        },
+        {
+          "value": "md",
+          "label": "Medium"
+        },
+        {
+          "value": "lg",
+          "label": "Large"
+        },
+        {
+          "value": "fill",
+          "label": "Fill screen"
+        }
+      ],
+      "info": "Choose \"Original image ratio\" to avoid image cropping. [Learn more](https://help.shopify.com/en/manual/online-store/images/theme-images#best-practices-for-slideshows-and-full-widtw-images)",
+      "default": "auto"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "3200 x 1600px .jpg recommended"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile image",
+      "info": "1300 x 1500px .jpg recommended. Default to desktop image."
+    },
+    {
+      "type": "select",
+      "id": "badge_icon",
+      "label": "Badge Icon",
+      "options": [
+        {
+          "value": "6-digit",
+          "label": "6 Digit",
+          "group": "6 Reasons"
+        },
+        {
+          "value": "vertical-storage-in-rectangle",
+          "label": "Vertical in Rectangle",
+          "group": "6 Reasons"
+        },
+        {
+          "value": "vertical-storage",
+          "label": "Vertical Storage",
+          "group": "6 Reasons"
+        },
+        {
+          "value": "durable-design",
+          "label": "Durable",
+          "group": "6 Reasons"
+        },
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "mobile-wheels",
+          "label": "Mobile Wheels",
+          "group": "6 Reasons"
+        },
+        {
+          "value": "weight",
+          "label": "Weight",
+          "group": "6 Reasons"
+        },
+        {
+          "value": "adjust-knobs",
+          "label": "Adjust Knobs",
+          "group": "6 Reasons"
+        },
+        {
+          "value": "knee-injuries",
+          "label": "Knee Injuries",
+          "group": "6 Reasons"
+        },
+        {
+          "value": "simple-footprint",
+          "label": "Simple Footprint",
+          "group": "6 Reasons"
+        },
+        {
+          "value": "51%",
+          "label": "51%",
+          "group": "6 Reasons"
+        },
+        {
+          "value": "14-levels",
+          "label": "14 Levels",
+          "group": "6 Reasons"
+        },
+        {
+          "value": "12-heights",
+          "label": "12 Heights",
+          "group": "6 Reasons"
+        },
+        {
+          "value": "joint-impact",
+          "label": "Joint Impact",
+          "group": "6 Reasons"
+        },
+        {
+          "value": "picto-coupon",
+          "label": "Coupon",
+          "group": "Shop"
+        },
+        {
+          "value": "picto-percent",
+          "label": "Percent",
+          "group": "Shop"
+        },
+        {
+          "value": "picto-gift",
+          "label": "Gift",
+          "group": "Shop"
+        },
+        {
+          "value": "picto-star",
+          "label": "Star",
+          "group": "Shop"
+        },
+        {
+          "value": "picto-like",
+          "label": "Like",
+          "group": "Shop"
+        },
+        {
+          "value": "picto-building",
+          "label": "Building",
+          "group": "Shop"
+        },
+        {
+          "value": "picto-love",
+          "label": "Love",
+          "group": "Shop"
+        },
+        {
+          "value": "picto-award-gift",
+          "label": "Award gift",
+          "group": "Shop"
+        },
+        {
+          "value": "picto-happy",
+          "label": "Happy",
+          "group": "Shop"
+        },
+        {
+          "value": "picto-box",
+          "label": "Box",
+          "group": "Shipping"
+        },
+        {
+          "value": "picto-pin",
+          "label": "Pin",
+          "group": "Shipping"
+        },
+        {
+          "value": "picto-timer",
+          "label": "Timer",
+          "group": "Shipping"
+        },
+        {
+          "value": "picto-validation",
+          "label": "Validation",
+          "group": "Shipping"
+        },
+        {
+          "value": "picto-truck",
+          "label": "Truck",
+          "group": "Shipping"
+        },
+        {
+          "value": "picto-return",
+          "label": "Return",
+          "group": "Shipping"
+        },
+        {
+          "value": "picto-earth",
+          "label": "Earth",
+          "group": "Shipping"
+        },
+        {
+          "value": "picto-plane",
+          "label": "Plane",
+          "group": "Shipping"
+        },
+        {
+          "value": "picto-credit-card",
+          "label": "Credit card",
+          "group": "Payment & Security"
+        },
+        {
+          "value": "picto-lock",
+          "label": "Lock",
+          "group": "Payment & Security"
+        },
+        {
+          "value": "picto-shield",
+          "label": "Shield",
+          "group": "Payment & Security"
+        },
+        {
+          "value": "picto-secure-profile",
+          "label": "Secure profile",
+          "group": "Payment & Security"
+        },
+        {
+          "value": "picto-money",
+          "label": "Money",
+          "group": "Payment & Security"
+        },
+        {
+          "value": "picto-recycle",
+          "label": "Recycle",
+          "group": "Ecology"
+        },
+        {
+          "value": "picto-leaf",
+          "label": "Leaf",
+          "group": "Ecology"
+        },
+        {
+          "value": "picto-tree",
+          "label": "Tree",
+          "group": "Ecology"
+        },
+        {
+          "value": "picto-mobile-phone",
+          "label": "Mobile phone",
+          "group": "Communication"
+        },
+        {
+          "value": "picto-phone",
+          "label": "Phone",
+          "group": "Communication"
+        },
+        {
+          "value": "picto-chat",
+          "label": "Chat",
+          "group": "Communication"
+        },
+        {
+          "value": "picto-customer-support",
+          "label": "Customer support",
+          "group": "Communication"
+        },
+        {
+          "value": "picto-operator",
+          "label": "Operator",
+          "group": "Communication"
+        },
+        {
+          "value": "picto-mailbox",
+          "label": "Mailbox",
+          "group": "Communication"
+        },
+        {
+          "value": "picto-envelope",
+          "label": "Envelope",
+          "group": "Communication"
+        },
+        {
+          "value": "picto-comment",
+          "label": "Comment",
+          "group": "Communication"
+        },
+        {
+          "value": "picto-question",
+          "label": "Question",
+          "group": "Communication"
+        },
+        {
+          "value": "picto-send",
+          "label": "Send",
+          "group": "Communication"
+        },
+        {
+          "value": "picto-at-sign",
+          "label": "At sign",
+          "group": "Tech"
+        },
+        {
+          "value": "picto-camera",
+          "label": "Camera",
+          "group": "Tech"
+        },
+        {
+          "value": "picto-wifi",
+          "label": "WiFi",
+          "group": "Tech"
+        },
+        {
+          "value": "picto-bluetooth",
+          "label": "Bluetooth",
+          "group": "Tech"
+        },
+        {
+          "value": "picto-printer",
+          "label": "Printer",
+          "group": "Tech"
+        },
+        {
+          "value": "picto-smart-watch",
+          "label": "Smart watch",
+          "group": "Tech"
+        },
+        {
+          "value": "picto-coffee",
+          "label": "Coffee",
+          "group": "Food & Drink"
+        },
+        {
+          "value": "picto-burger",
+          "label": "Burger",
+          "group": "Food & Drink"
+        },
+        {
+          "value": "picto-beer",
+          "label": "Beer",
+          "group": "Food & Drink"
+        },
+        {
+          "value": "picto-target",
+          "label": "Target",
+          "group": "Other"
+        },
+        {
+          "value": "picto-document",
+          "label": "Document",
+          "group": "Other"
+        },
+        {
+          "value": "picto-jewelry",
+          "label": "Jewelry",
+          "group": "Other"
+        },
+        {
+          "value": "picto-music",
+          "label": "Music",
+          "group": "Other"
+        },
+        {
+          "value": "picto-file",
+          "label": "File",
+          "group": "Other"
+        },
+        {
+          "value": "picto-mask",
+          "label": "Mask",
+          "group": "Other"
+        },
+        {
+          "value": "picto-stop",
+          "label": "Stop",
+          "group": "Other"
+        }
+      ],
+      "default": "6-digit"
+    },
+    {
+      "type": "image_picker",
+      "id": "custom_badge_icon",
+      "label": "Badge Icon"
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge Text",
+      "default": "MACHINES IN 1"
+    },
+    {
+      "type": "range",
+      "min": 0,
+      "max": 100,
+      "id": "badge_desktop_top",
+      "label": "Desktop Badge Top Position(%)",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "min": 0,
+      "max": 100,
+      "id": "badge_desktop_left",
+      "label": "Desktop Badge Left Position(%)",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "min": 0,
+      "max": 100,
+      "id": "badge_mobile_top",
+      "label": "Mobile Badge Top Position(%)",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "min": 0,
+      "max": 100,
+      "id": "badge_mobile_left",
+      "label": "Mobile Badge Left Position(%)",
+      "default": 50
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Overlay",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 30
+    }
+  ],
+  "blocks": [
+    {
+      "type": "subheading",
+      "name": "Subheading",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Subheading"
+        },
+        {
+          "type": "image_picker",
+          "id": "subheading_image",
+          "label": "Image"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "name": "Heading",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "6 reasons why 100,000 + are making their knees healthy with a Nordic Hyper"
+        },
+        {
+          "type": "select",
+          "id": "heading_tag",
+          "label": "Style",
+          "options": [
+            {
+              "value": "h0",
+              "label": "H0"
+            },
+            {
+              "value": "h1",
+              "label": "H1"
+            },
+            {
+              "value": "h2",
+              "label": "H2"
+            },
+            {
+              "value": "h3",
+              "label": "H3"
+            },
+            {
+              "value": "h4",
+              "label": "H4"
+            },
+            {
+              "value": "h5",
+              "label": "H5"
+            },
+            {
+              "value": "h6",
+              "label": "H6"
+            }
+          ],
+          "default": "h1"
+        }
+      ]
+    },
+    {
+      "name": "Paragraph",
+      "type": "richtext",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Content",
+          "default": "<p>The Nordic Hyper is a machine designed to lorem ipsum dolor sit amet.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero With Image(FA)",
+      "blocks": [
+        {
+          "type": "subheading",
+          "settings": {
+            "text": "Subheading"
+          }
+        },
+        {
+          "type": "heading",
+          "settings": {
+            "text": "Hero with Image",
+            "heading_tag": "h1"
+          }
+        },
+        {
+          "type": "richtext"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,507 @@
+{%- unless section.settings.full_width -%}
+  {%- render 'section-spacing-collapsing' -%}
+{%- endunless -%}
+
+<style>
+  #shopify-section-{{ section.id }} {
+    {%- if section.settings.full_width -%}
+      --section-outer-spacing-block: 0;
+    {%- endif -%}
+    padding: {{section.settings.section_spacing_desk}}rem 0;
+    background: {{section.settings.background}};
+  }
+  @media only screen and (max-width:768px){
+    #shopify-section-{{ section.id }} {
+      padding: {{section.settings.section_spacing_mob}}rem 0;
+    }
+    #shopify-section-{{ section.id }} .desktop-liquid {
+      display: none;
+    }
+    #shopify-section-{{ section.id }} .mobile-liquid {
+      width: 100%;
+    }
+    .step_container_details .mobile-liquid button {
+      display: block;
+    }
+  }
+  @media only screen and (min-width:769px){
+    #shopify-section-{{ section.id }} .mobile-liquid {
+      display: none;
+    }
+  }
+  #shopify-section-{{ section.id }} .bg-custom {
+    background: {{section.settings.background}};
+  }
+  #shopify-section-{{ section.id }} .step_container_details_name {
+    color: rgb(var(--scheme-primary-button-rgb));
+  }
+  #shopify-section-{{ section.id }} .video-play-button:not(.video-play-button--static):before {
+    content: none;
+  }
+  #shopify-section-{{ section.id }} button {
+    margin: 1rem 0 0;
+  }
+  #shopify-section-{{ section.id }} button.pdf-btn {
+    background: #C0C3C4;
+    color: #000;
+  }
+  #shopify-section-{{ section.id }} button.pdf-btn > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+  }
+  #shopify-section-{{ section.id }} button.pdf-btn > div > svg {
+    width: 1.35rem;
+    height: auto;
+  }
+  #shopify-section-{{ section.id }} button.video-play-button {
+    background: #11171B;
+  }
+  #shopify-section-{{ section.id }} button.video-play-button > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+  }
+</style>
+
+<div {% render 'section-properties' %}>
+  <div class="vertical_timeline"></div>
+  {% for block in section.blocks %}
+    {% if forloop.index == section.blocks.size %}
+      <style>
+    #{{ block.settings.step_id }}:before {
+        position: absolute;
+        content: "";
+        top: -1rem;
+        height: 5.5rem;
+        width: 0.12rem;
+        background: rgb(var(--scheme-primary-button-rgb));
+        left: -3rem;
+      }
+      </style>
+    {% endif %}
+    <div id="{{ block.settings.step_id }}" class="step_container">
+      <div class="step_container_details">
+        <div class="step_container_details_name">
+          {{ block.settings.step_name }}
+        </div>
+        <div class="step_container_details_title {{ block.settings.heading_tag }}">
+          {{ block.settings.step_title }}
+        </div>
+        <div class="step_container_details_text">
+          {{ block.settings.step_desc }}
+        </div>
+        {% if block.settings.pdf_btn_text != blank %}
+          {%- render 'pdf-button',
+            content: block.settings.pdf_btn_text,
+            href: block.settings.pdf_btn_url,
+            size: block.settings.pdf_btn_size,
+            style: block.settings.pdf_btn_style,
+            width: block.settings.pdf_btn_width
+          -%}
+        {% endif %}
+        {% if block.settings.video_btn_text != blank %}
+          {%- render 'video-button',
+            id: block.id,
+            content: block.settings.video_btn_text,
+            href: block.settings.video_btn_url,
+            size: block.settings.video_btn_size,
+            style: block.settings.video_btn_style,
+            width: block.settings.video_btn_width
+          -%}
+        {% endif %}
+        <div class="step_container_video mobile-liquid">
+          {%- if block.settings.video != blank -%}
+            <button aria-controls="{{ block.id }}" style="display: block;">
+              <img
+                class="step_container_video_img"
+                width=""
+                height=""
+                src="{{ block.settings.video_thumbnail | img_url: 'large' }}"
+              >
+            </button>
+          {% else %}
+            <a href="{{ block.settings.pdf_btn_url }}">
+              <img
+                class="step_container_video_img"
+                width=""
+                height=""
+                src="{{ block.settings.video_thumbnail | img_url: 'large' }}"
+              >
+            </a>
+          {% endif %}
+          {% if block.settings.pdf_btn_text != blank %}
+            {%- render 'pdf-button',
+              content: block.settings.pdf_btn_text,
+              href: block.settings.pdf_btn_url,
+              size: block.settings.pdf_btn_size,
+              style: block.settings.pdf_btn_style,
+              width: block.settings.pdf_btn_width
+            -%}
+          {% endif %}
+          {% if block.settings.video_btn_text != blank %}
+            {%- render 'video-button',
+              id: block.id,
+              content: block.settings.video_btn_text,
+              href: block.settings.video_btn_url,
+              size: block.settings.video_btn_size,
+              style: block.settings.video_btn_style,
+              width: block.settings.video_btn_width
+            -%}
+          {% endif %}
+        </div>
+        {{ block.settings.liquid }}
+        <x-drawer
+          id="{{ block.id }}"
+          class="drawer modal-window modal-window--video"
+          open-from="bottom"
+          template="modal"
+        >
+          {%- if block.settings.video -%}
+            <video-media autoplay style="--aspect-ratio: {{ block.settings.video.aspect_ratio }}">
+              {{-
+                block.settings.video
+                | video_tag:
+                  playsinline: true,
+                  muted: true,
+                  loop: false,
+                  controls: true,
+                  preload: 'metadata',
+                  class: 'object-fill'
+              -}}
+            </video-media>
+          {%- endif -%}
+        </x-drawer>
+      </div>
+      <div class="step_container_video desktop-liquid">
+        {%- if block.settings.video != blank -%}
+          <button aria-controls="{{ block.id }}" style="display: block;">
+            <img
+              class="step_container_video_img"
+              width=""
+              height=""
+              src="{{ block.settings.video_thumbnail | img_url: 'large' }}"
+            >
+          </button>
+        {% else %}
+          <a href="{{ block.settings.pdf_btn_url }}">
+            <img
+              class="step_container_video_img"
+              width=""
+              height=""
+              src="{{ block.settings.video_thumbnail | img_url: 'large' }}"
+            >
+          </a>
+        {% endif %}
+        {% if block.settings.pdf_btn_text != blank %}
+          {%- render 'pdf-button',
+            content: block.settings.pdf_btn_text,
+            href: block.settings.pdf_btn_url,
+            size: block.settings.pdf_btn_size,
+            style: block.settings.pdf_btn_style,
+            width: block.settings.pdf_btn_width
+          -%}
+        {% endif %}
+        {% if block.settings.video_btn_text != blank %}
+          {%- render 'video-button',
+            id: block.id,
+            content: block.settings.video_btn_text,
+            href: block.settings.video_btn_url,
+            size: block.settings.video_btn_size,
+            style: block.settings.video_btn_style,
+            width: block.settings.video_btn_width
+          -%}
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+{% schema %}
+{
+  "name": "Training Steps (FA)",
+  "class": "shopify-section--training-steps-fa",
+  "tag": "section",
+  "disabled_on": {
+    "templates": ["password"],
+    "groups": ["header", "custom.overlay"]
+  },
+  "max_blocks": 5,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "section_spacing_desk",
+      "label": "Spacing at top & bottom (Desktop)",
+      "min": 0,
+      "max": 5,
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem"
+    },
+    {
+      "type": "range",
+      "id": "section_spacing_mob",
+      "label": "Spacing at top & bottom (Mobile)",
+      "min": 0,
+      "max": 5,
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem"
+    },
+    {
+      "type": "header",
+      "content": "Colors",
+      "info": "Gradient replaces solid colors when set."
+    },
+    {
+      "type": "color_scheme",
+      "id": "scheme",
+      "label": "Color Scheme"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Step card text"
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Step",
+      "type": "step",
+      "settings": [
+        {
+          "type": "text",
+          "id": "step_id",
+          "label": "Link id of step:",
+          "default": "step_1"
+        },
+        {
+          "type": "text",
+          "id": "step_name",
+          "label": "Name of step:",
+          "default": "Step 1"
+        },
+        {
+          "type": "text",
+          "id": "step_title",
+          "label": "Title of step:",
+          "default": "How to assemble your Nordic Hyper"
+        },
+        {
+          "type": "select",
+          "id": "heading_tag",
+          "label": "Select style of title:",
+          "options": [
+            {
+              "value": "h0",
+              "label": "H0"
+            },
+            {
+              "value": "h1",
+              "label": "H1"
+            },
+            {
+              "value": "h2",
+              "label": "H2"
+            },
+            {
+              "value": "h3",
+              "label": "H3"
+            },
+            {
+              "value": "h4",
+              "label": "H4"
+            },
+            {
+              "value": "h5",
+              "label": "H5"
+            },
+            {
+              "value": "h6",
+              "label": "H6"
+            }
+          ],
+          "default": "h1"
+        },
+        {
+          "type": "text",
+          "id": "step_desc",
+          "label": "Description of step:",
+          "default": "Watch this assembly video to learn how to quickly put together your Nordic Hyper"
+        },
+        {
+          "type": "text",
+          "id": "pdf_btn_text",
+          "label": "Text for PDF button:",
+          "default": "ASSEMBLY PDF"
+        },
+        {
+          "type": "text",
+          "id": "pdf_btn_url",
+          "label": "Link for PDF button:"
+        },
+        {
+          "type": "select",
+          "id": "pdf_btn_size",
+          "label": "Button size",
+          "default": "base",
+          "options": [
+            {
+              "label": "Small",
+              "value": "sm"
+            },{
+              "label": "Default",
+              "value": "base"
+            },{
+              "label": "Large",
+              "value": "lg"
+            },{
+              "label": "X-large",
+              "value": "xl"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "pdf_btn_width",
+          "label": "Button width",
+          "default": "base",
+          "options": [{
+            "label": "Default",
+            "value": "base"
+          },{
+            "label": "Medium",
+            "value": "md"
+          },{
+            "label": "Large",
+            "value": "lg"
+          },{
+            "label": "X-large",
+            "value": "xl"
+          }]
+        },
+        {
+          "type": "select",
+          "id": "pdf_btn_style",
+          "label": "Button style",
+          "default": "fill",
+          "options": [{
+            "label":"Primary",
+            "value": "fill"
+          },{
+            "label":"Secondary",
+            "value":"secondary"
+          },{
+            "label":"Outline",
+            "value": "outline"
+          },{
+            "label":"Link",
+            "value": "link"
+          }]
+        },
+        {
+          "type": "text",
+          "id": "video_btn_text",
+          "label": "Text for video button:",
+          "default": "Watch Video"
+        },
+        {
+          "type": "select",
+          "id": "video_btn_size",
+          "label": "Button size",
+          "default": "base",
+          "options": [
+            {
+              "label": "Small",
+              "value": "sm"
+            },{
+              "label": "Default",
+              "value": "base"
+            },{
+              "label": "Large",
+              "value": "lg"
+            },{
+              "label": "X-large",
+              "value": "xl"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "video_btn_width",
+          "label": "Button width",
+          "default": "base",
+          "options": [{
+            "label": "Default",
+            "value": "base"
+          },{
+            "label": "Medium",
+            "value": "md"
+          },{
+            "label": "Large",
+            "value": "lg"
+          },{
+            "label": "X-large",
+            "value": "xl"
+          }]
+        },
+        {
+          "type": "select",
+          "id": "video_btn_style",
+          "label": "Button style",
+          "default": "fill",
+          "options": [{
+            "label":"Primary",
+            "value": "fill"
+          },{
+            "label":"Secondary",
+            "value":"secondary"
+          },{
+            "label":"Outline",
+            "value": "outline"
+          },{
+            "label":"Link",
+            "value": "link"
+          }]
+        },
+        {
+          "type": "image_picker",
+          "label": "Add video thumbnail",
+          "id": "video_thumbnail"
+        },
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Video"
+        },
+        {
+          "type": "liquid",
+          "id": "liquid",
+          "label": "Liquid",
+          "info": "Add app snippets or other Liquid code to create advanced customizations.",
+          "default": "<p style=\"text-align: center\">Write or copy/paste Liquid code</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Training Steps (FA)",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}

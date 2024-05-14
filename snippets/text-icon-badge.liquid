@@ -1,0 +1,68 @@
+{%- comment -%}
+----------------------------------------------------------------------------------------------------------------------
+TEXT ICON BADGE
+----------------------------------------------------------------------------------------------------------------------
+
+Generate a badge with icon and text, optional background color
+
+********************************************
+Supported variables
+********************************************
+
+* content: the content of the button
+* icon: the name of an optional icon to render along the button
+* icon_location: start of end - default: start
+* style: base, button or link (underline) - default: button
+* color: rgb text color
+* background: rgb background color
+* background-hover: rgb background hover color
+* drawer_id: drawer id for modal show
+{%- endcomment -%}
+
+{% liquid
+  assign styles = ""
+  assign element = "div"
+  assign attributes = ""
+  assign class = "text-with-icon text-with-icon--badge "
+  
+  case style
+    when 'button'
+      assign text_class = 'text-eyebrow'
+      assign class = class | append: 'text-with-icon--button'
+    when 'link'
+      assign text_class = 'text-nav-link-underline'
+    when 'base'
+      assign text_class = 'base'
+    else
+      assign text_class = 'text-eyebrow'
+  endcase
+
+  if color != blank
+    assign styles = styles | append: '--text-color:' | append: color | append: ';' 
+  endif
+
+  if icon_location == 'end'
+    assign styles =  styles | append: '--direction: row-reverse;'
+  endif
+
+  if background != blank
+    assign styles = styles | append: '--background:' | append: background | append: ';' 
+  endif
+
+  if background_hover != blank
+    assign styles = styles | append: '--background-hover:' | append: background_hover | append: ';'
+  endif
+
+  if drawer_id != blank
+    assign element = "button"
+    assign attributes = attributes | append: "aria-controls=" | append: drawer_id | append: ' aria-expanded="false" '
+  endif
+
+  assign attributes = attributes | append: 'style="' | append: styles | append: '" '
+  assign attributes = attributes | append: 'class="' | append: class | append: '" '
+%}
+
+<{{ element }} {{ attributes }}>
+  {%- render 'icon' with icon -%}
+  <span class="{{ text_class }}">{{- content -}}</span>
+</{{ element }}>

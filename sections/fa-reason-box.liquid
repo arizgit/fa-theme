@@ -1,0 +1,2142 @@
+{%- render 'section-spacing-collapsing' -%}
+
+<style>
+  #shopify-section-{{ section.id }} {
+    --product-grid: auto / minmax(0, 1fr);
+    --product-gallery-media-list-grid: auto / auto-flow {% if section.settings.mobile_carousel_control == 'free_scroll' %}{% if section.settings.mobile_media_size == 'expanded' %}84vw{% else %}73vw{% endif %}{% else %}100%{% endif %};
+    --product-gallery-media-list-gap: {% if section.settings.mobile_media_size == 'expanded' %}var(--spacing-0-5){% else %}var(--grid-gutter){% endif %};
+    padding-top: {{ section.settings.padding_top }}rem;
+    padding-bottom: {{ section.settings.padding_bottom }}rem;
+  }
+
+  @media screen and (max-width: 999px) {
+    #shopify-section-{{ section.id }} {
+      --section-spacing-block-start: {% if section.settings.mobile_media_size == 'expanded' %}0px{% else %}var(--container-gutter){% endif %};
+    }
+  }
+
+  @media screen and (min-width: 1000px) {
+    #shopify-section-{{ section.id }} {
+      {%- assign media_ratio = section.settings.desktop_media_width | divided_by: 50.0 -%}
+      --product-grid: auto / minmax(0, {{ media_ratio }}fr) minmax(0, {{ 2.0 | minus: media_ratio }}fr);
+      --product-gallery-media-list-grid: {% if section.settings.desktop_media_layout contains 'grid' %}auto-flow dense / repeat(2, minmax(0, 1fr)){% else %}auto / auto-flow 100%{% endif %};
+      --product-gallery-media-list-gap: calc(var(--grid-gutter) / 2);
+    }
+
+    {%- if section.settings.desktop_media_layout == 'grid_highlight' -%}
+      #shopify-section-{{ section.id }} .product-gallery__media-list > :not([hidden]) {
+        grid-column: span 2;
+      }
+
+      #shopify-section-{{ section.id }} .product-gallery__media-list > :not([hidden]) ~ *:not(.product-gallery__media--expand) {
+        grid-column: span 1;
+      }
+    {%- endif -%}
+  }
+
+  #shopify-section-{{ section.id }} {
+    background-color: {{ section.settings.background_color }} !important;
+    background-image: {{ section.settings.background_gradient }};
+    color: {{ section.settings.text_color }};
+  }
+
+  @media screen and (min-width: 1400px) {
+    #shopify-section-{{ section.id }} {
+      --product-gallery-media-list-gap: var(--grid-gutter);
+    }
+  }
+
+  #shopify-section-{{ section.id }} .reason-box-section {
+    width: 1200px;
+    display: flex;
+    justify-content: space-around;
+    flex-direction: {% if section.settings.order == 'image-first' %}row-reverse{% endif %};
+    margin: auto;
+  }
+
+  .reason-text-container {
+    width: 512px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .reason-text-container .reason-title {
+    display: flex;
+    align-items: end;
+    color: {{ section.settings.scheme.settings._primary_button }};
+  }
+
+  .reason-text-container .reason-title h2 {
+    font-size: 100px;
+    font-weight: 300;
+    line-height: 0.7;
+  }
+
+  .reason-text-container .reason-title p {
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .reason-text-container .reason-subtitle {
+    font-size: 42px;
+    line-height: 1.2;
+    font-weight: 600;
+    margin-top: 20px;
+  }
+
+  .reason-text-container .reason-description {
+    font-size: 18px;
+    line-height: 1.7;
+    width: 80%;
+    margin-top: 20px;
+  }
+
+  .reason-text-container .reason-pro-tip {
+    background: #5E727F;
+    padding: 16px;
+    border-radius: 12px;
+    margin-top: 20px;
+  }
+
+  .reason-text-container .reason-effects {
+    display: flex;
+    margin-top: 40px;
+  }
+
+  .reason-text-container .reason-effects .reason-effects-box {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .reason-text-container .reason-effect {
+    display: flex;
+    flex-direction: column;
+    width: 155px;
+    align-items: center;
+    margin-right: 10px;
+  }
+
+  .reason-text-container .reason-effect .icon-container {
+    width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    box-shadow: 1px 0.5px 1px lightgray;
+    border-radius: 30px;
+    margin-bottom: 10px;
+  }
+
+  .reason-text-container .reason-effect .icon-container svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .reason-text-container .reason-effect .icon-container path {
+    fill: #52626C;
+  }
+
+  .reason-text-container .reason-effect p {
+    font-size: 16px;
+    text-align: center;
+  }
+
+  .reason-text-container .reason-components {
+    display: flex;
+    flex-wrap: wrap;
+    border-radius: 12px;
+    background: #ffffff;
+    justify-content: space-around;
+    padding: 10px;
+    margin-top: 20px;
+  }
+
+  .reason-text-container .reason-component {
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin: 15px 5px;
+  }
+
+  .reason-text-container .reason-component h6 {
+    color: {{ section.settings.scheme.settings._primary_button }};
+  }
+
+  .reason-image-container {
+    width: 480px;
+    position: relative;
+  }
+
+  .reason-image-container .reason-image {
+    width: 100%;
+  }
+
+  .reason-image-container .reason-image-desc-container {
+    position: absolute;
+    font-size: 16px;
+    text-align: center;
+  }
+
+  .reason-image-container .reason-image-desc {
+    position: relative;
+  }
+
+  .reason-image-container .reason-image-desc-image {
+    position: absolute;
+  }
+
+  .reason-image-container .reason-image-badge-container {
+    position: absolute;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+
+  .reason-image-container .reason-image-badge-container svg {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+  }
+
+  @media (min-width: 769px) {
+    .reason-text-container .reason-effects .reason-effects-box {
+      width: 100%;
+    }
+    .reason-image-container .reason-image-desc-mobile-image {
+      display: none;
+    }
+    .reason-image-container .reason-image {
+      border-radius: 10px;
+    }
+    .reason-image-container .reason-image-desc-mobile-container {
+      display: none;
+    }
+  }
+
+  @media (max-width: 1080px) {
+    .reason-box-section {
+      width: 900px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    #shopify-section-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top_mobile }}rem;
+      padding-bottom: {{ section.settings.padding_bottom_mobile }}rem;
+    }
+
+    #shopify-section-{{ section.id }} .reason-box-section {
+      width: 100%;
+      flex-direction: column;
+    }
+
+    .reason-image-container .reason-image-desc-mobile-image {
+      position: absolute;
+    }
+
+    .reason-image-container .reason-image-desc-container {
+      display: none;
+    }
+
+    .reason-image-container .reason-image-desc-mobile-container {
+      position: absolute;
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .reason-text-container {
+      width: 100%;
+      padding-top: 0px;
+      padding-left: 2rem;
+      padding-right: 2rem;
+      padding-bottom: 2rem;
+    }
+
+    .reason-text-container .reason-title {
+      display: flex;
+      align-items: start;
+      flex-direction: column;
+    }
+  
+    .reason-text-container .reason-title p {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+
+    .reason-text-container .reason-subtitle {
+      font-size: 32px;
+    }
+  
+    .reason-text-container .reason-description {
+      width: 100%;
+    }
+
+    .reason-text-container .reason-components {
+      padding: 20px;
+    }
+
+    .reason-text-container .reason-component {
+      width: 35%;
+    }
+
+    .reason-image-container {
+      width: 100%;
+    }
+
+    .reason-text-container .reason-effects {
+      overflow: auto;
+    }
+  
+    .reason-text-container .reason-effect {
+      width: 155px;
+    }
+  }
+</style>
+
+<div class="reason-box-section">
+  <div class="reason-text-container">
+    {%- for block in section.blocks -%}
+      {%- case block.type -%}
+        {%- when 'title' -%}
+          <div class="reason-title" style="color: {{ block.settings.title_color }};">
+            <h2>{{ block.settings.title_1 }}</h2>
+            <p>{{ block.settings.title_2 }}</p>
+          </div>
+        {%- when 'subtitle' -%}
+          <h2 class="reason-subtitle">{{ block.settings.sub_title }}</h2>
+        {%- when 'description' -%}
+          <p class="reason-description">{{ block.settings.description }}</p>
+        {%- when 'pro-tip' -%}
+          <div class="reason-pro-tip">
+            <p>{{ block.settings.pro_tip_title }} :</p>
+            <p>{{ block.settings.pro_tip_text }}</p>
+          </div>
+        {%- when 'effects' -%}
+          <div class="reason-effects">
+            <div class="reason-effects-box">
+              {% if block.settings.effect_text_1 != blank %}
+                <div class="reason-effect">
+                  <div class="icon-container">
+                    {% render 'icon' with block.settings.effect_icon_1 %}
+                  </div>
+                  <p>{{ block.settings.effect_text_1 }}</p>
+                </div>
+              {% endif %}
+              {% if block.settings.effect_text_2 != blank %}
+                <div class="reason-effect">
+                  <div class="icon-container">
+                    {% render 'icon' with block.settings.effect_icon_2 %}
+                  </div>
+                  <p>{{ block.settings.effect_text_2 }}</p>
+                </div>
+              {% endif %}
+              {% if block.settings.effect_text_3 != blank %}
+                <div class="reason-effect">
+                  <div class="icon-container">
+                    {% render 'icon' with block.settings.effect_icon_3 %}
+                  </div>
+                  <p>{{ block.settings.effect_text_3 }}</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        {%- when 'components' -%}
+          <div class="reason-components">
+            {% if block.settings.component_title_1 != blank %}
+              <div class="reason-component">
+                <h6>{{ block.settings.component_title_1 }}</h6>
+                <p>{{ block.settings.component_text_1 }}</p>
+              </div>
+            {% endif %}
+            {% if block.settings.component_title_2 != blank %}
+              <div class="reason-component">
+                <h6>{{ block.settings.component_title_2 }}</h6>
+                <p>{{ block.settings.component_text_2 }}</p>
+              </div>
+            {% endif %}
+            {% if block.settings.component_title_3 != blank %}
+              <div class="reason-component">
+                <h6>{{ block.settings.component_title_3 }}</h6>
+                <p>{{ block.settings.component_text_3 }}</p>
+              </div>
+            {% endif %}
+            {% if block.settings.component_title_4 != blank %}
+              <div class="reason-component">
+                <h6>{{ block.settings.component_title_4 }}</h6>
+                <p>{{ block.settings.component_text_4 }}</p>
+              </div>
+            {% endif %}
+            {% if block.settings.component_title_5 != blank %}
+              <div class="reason-component">
+                <h6>{{ block.settings.component_title_5 }}</h6>
+                <p>{{ block.settings.component_text_5 }}</p>
+              </div>
+            {% endif %}
+            {% if block.settings.component_title_6 != blank %}
+              <div class="reason-component">
+                <h6>{{ block.settings.component_title_6 }}</h6>
+                <p>{{ block.settings.component_text_6 }}</p>
+              </div>
+            {% endif %}
+          </div>
+      {%- endcase -%}
+    {%- endfor -%}
+  </div>
+  
+  <div class="reason-image-container">
+    {%- for block in section.blocks -%}
+      {%- case block.type -%}
+        {%- when 'reason-image' -%}
+          <img class="reason-image" src="{{ block.settings.reason_image | image_url }}">
+          <div class="reason-image-desc-container" style="top: {{ block.settings.desc_container_top_1 }}%; left: {{ block.settings.desc_container_left_1 }}%;">
+            <div class="reason-image-desc">
+              <div style="font-size: {{ block.settings.desc_text_size }}px; color: {{ block.settings.desc_text_color }};">{{ block.settings.desc_text_1 }}</div>
+              {% if block.settings.desc_image_1 != blank %}
+                <img class="reason-image-desc-image" style="top: {{ block.settings.desc_image_top_1 }}px; left: {{ block.settings.desc_image_left_1 }}px;" src="{{ block.settings.desc_image_1 | image_url }}" >
+              {% endif %}
+            </div>
+          </div>
+          <div class="reason-image-desc-mobile-container" style="top: {{ block.settings.desc_container_top_mobile_1 }}%; left: {{ block.settings.desc_container_left_mobile_1 }}%;">
+            <div class="reason-image-desc">
+              <div style="font-size: {{ block.settings.desc_text_size }}px; color: {{ block.settings.desc_text_color }};">{{ block.settings.desc_text_1 }}</div>
+              {% if block.settings.desc_image_1 != blank %}
+                <img class="reason-image-desc-image" style="top: {{ block.settings.desc_image_top_1 }}px; left: {{ block.settings.desc_image_left_1 }}px;" src="{{ block.settings.desc_image_1 | image_url }}" >
+              {% endif %}
+            </div>
+          </div>
+          <div class="reason-image-desc-container" style="top: {{ block.settings.desc_container_top_2 }}%; left: {{ block.settings.desc_container_left_2 }}%;">
+            <div class="reason-image-desc">
+              <div style="font-size: {{ block.settings.desc_text_size }}px; color: {{ block.settings.desc_text_color }};">{{ block.settings.desc_text_2 }}</div>
+              {% if block.settings.desc_image_2 != blank %}
+                <img class="reason-image-desc-image" style="top: {{ block.settings.desc_image_top_2 }}px; left: {{ block.settings.desc_image_left_2 }}px;" src="{{ block.settings.desc_image_2 | image_url }}" >
+              {% endif %}
+            </div>
+          </div>
+          <div class="reason-image-desc-mobile-container" style="top: {{ block.settings.desc_container_top_mobile_2 }}%; left: {{ block.settings.desc_container_left_mobile_2 }}%;">
+            <div class="reason-image-desc">
+              <div style="font-size: {{ block.settings.desc_text_size }}px; color: {{ block.settings.desc_text_color }};">{{ block.settings.desc_text_2 }}</div>
+              {% if block.settings.desc_image_2 != blank %}
+                <img class="reason-image-desc-image" style="top: {{ block.settings.desc_image_top_2 }}px; left: {{ block.settings.desc_image_left_2 }}px;" src="{{ block.settings.desc_image_2 | image_url }}" >
+              {% endif %}
+            </div>
+          </div>
+          {% if block.settings.badge_text_1 != blank %}
+            <div class="reason-image-badge-container" style="top: {{ block.settings.badge_top_1 }}%; left: {{ block.settings.badge_left_1 }}%; color: {{ block.settings.badge_text_color_1 }}; background: {{ block.settings.badge_back_color_1 }}">
+              {% render 'icon' with block.settings.badge_icon_1 %}
+              <p>{{block.settings.badge_text_1 }}</p>
+            </div>
+          {% endif %}
+          {% if block.settings.badge_text_2 != blank %}
+            <div class="reason-image-badge-container" style="top: {{ block.settings.badge_top_2 }}%; left: {{ block.settings.badge_left_2 }}%; color: {{ block.settings.badge_text_color_2 }}; background: {{ block.settings.badge_back_color_2 }}">
+              {% render 'icon' with block.settings.badge_icon_2 %}
+              <p>{{block.settings.badge_text_2 }}</p>
+            </div>
+          {% endif %}
+      {%- endcase -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Reason Box(FA)",
+  "class": "shopify-section--reason-box",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "order",
+      "label": "Order",
+      "info": "How do you like arrange image and texts?",
+      "options": [
+        {
+          "value": "image-first",
+          "label": "Image First"
+        },
+        {
+          "value": "texts-first",
+          "label": "Texts First"
+        }
+      ],
+      "default": "texts-first"
+    },
+    {
+      "type": "header",
+      "content": "Custom top and bottom padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Top Padding",
+      "info": "Desktop",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Bottom Padding",
+      "info": "Desktop",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Top Padding",
+      "info": "Mobile & tablet",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Bottom Padding",
+      "info": "Mobile & tablet",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "header",
+      "content": "Colors",
+      "info": "Gradient replaces solid colors when set."
+    },
+    {
+      "type": "color_scheme",
+      "id": "scheme",
+      "label": "Color Scheme"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text"
+    },
+    {
+      "type": "header",
+      "content": "Input colors",
+      "info": "Applies to elements like quantity selector and variant selectors."
+    },
+    {
+      "type": "color",
+      "id": "input_background",
+      "label": "Background",
+      "default": "rgba(0,0,0,0)"
+    },
+    {
+      "type": "color",
+      "id": "input_text_color",
+      "label": "Text"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "title",
+      "name": "Title",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title_1",
+          "label": "Title 1",
+          "default": "01"
+        },
+        {
+          "type": "text",
+          "id": "title_2",
+          "label": "Title 2",
+          "default": "REASON #1"
+        },
+        {
+          "type": "color",
+          "id": "title_color",
+          "label": "Title Color",
+          "default": "#ffffff"
+        }
+      ]
+    },
+    {
+      "type": "subtitle",
+      "name": "Sub Title",
+      "settings": [
+        {
+          "type": "text",
+          "id": "sub_title",
+          "label": "Sub Title",
+          "default": "Sub Title here!"
+        }
+      ]
+    },
+    {
+      "type": "description",
+      "name": "Description",
+      "settings": [
+        {
+          "type": "text",
+          "id": "description",
+          "label": "Description",
+          "default": "Description here!"
+        }
+      ]
+    },
+    {
+      "type": "pro-tip",
+      "name": "Pro Tip",
+      "settings": [
+        {
+          "type": "text",
+          "id": "pro_tip_title",
+          "label": "Pro Tip Title",
+          "default": "PRO TIP"
+        },
+        {
+          "type": "text",
+          "id": "pro_tip_text",
+          "label": "Pro Tip Text",
+          "default": "Pro Tip text here!"
+        }
+      ]
+    },
+    {
+      "type": "effects",
+      "name": "Effects",
+      "settings": [
+        {
+          "type": "select",
+          "id": "effect_icon_1",
+          "label": "Icon 1",
+          "options": [
+            {
+              "value": "6-digit",
+              "label": "6 Digit",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "vertical-storage-in-rectangle",
+              "label": "Vertical in Rectangle",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "vertical-storage",
+              "label": "Vertical Storage",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "durable-design",
+              "label": "Durable",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "mobile-wheels",
+              "label": "Mobile Wheels",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "weight",
+              "label": "Weight",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "adjust-knobs",
+              "label": "Adjust Knobs",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "knee-injuries",
+              "label": "Knee Injuries",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "simple-footprint",
+              "label": "Simple Footprint",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "51%",
+              "label": "51%",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "14-levels",
+              "label": "14 Levels",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "12-heights",
+              "label": "12 Heights",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "joint-impact",
+              "label": "Joint Impact",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "picto-coupon",
+              "label": "Coupon",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-percent",
+              "label": "Percent",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-gift",
+              "label": "Gift",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-star",
+              "label": "Star",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-like",
+              "label": "Like",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-building",
+              "label": "Building",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-love",
+              "label": "Love",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-award-gift",
+              "label": "Award gift",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-happy",
+              "label": "Happy",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-box",
+              "label": "Box",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-pin",
+              "label": "Pin",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-timer",
+              "label": "Timer",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-validation",
+              "label": "Validation",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-truck",
+              "label": "Truck",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-return",
+              "label": "Return",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-earth",
+              "label": "Earth",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-plane",
+              "label": "Plane",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-credit-card",
+              "label": "Credit card",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-lock",
+              "label": "Lock",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-shield",
+              "label": "Shield",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-secure-profile",
+              "label": "Secure profile",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-money",
+              "label": "Money",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-recycle",
+              "label": "Recycle",
+              "group": "Ecology"
+            },
+            {
+              "value": "picto-leaf",
+              "label": "Leaf",
+              "group": "Ecology"
+            },
+            {
+              "value": "picto-tree",
+              "label": "Tree",
+              "group": "Ecology"
+            },
+            {
+              "value": "picto-mobile-phone",
+              "label": "Mobile phone",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-phone",
+              "label": "Phone",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-chat",
+              "label": "Chat",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-customer-support",
+              "label": "Customer support",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-operator",
+              "label": "Operator",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-mailbox",
+              "label": "Mailbox",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-envelope",
+              "label": "Envelope",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-comment",
+              "label": "Comment",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-question",
+              "label": "Question",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-send",
+              "label": "Send",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-at-sign",
+              "label": "At sign",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-camera",
+              "label": "Camera",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-wifi",
+              "label": "WiFi",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-bluetooth",
+              "label": "Bluetooth",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-printer",
+              "label": "Printer",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-smart-watch",
+              "label": "Smart watch",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-coffee",
+              "label": "Coffee",
+              "group": "Food & Drink"
+            },
+            {
+              "value": "picto-burger",
+              "label": "Burger",
+              "group": "Food & Drink"
+            },
+            {
+              "value": "picto-beer",
+              "label": "Beer",
+              "group": "Food & Drink"
+            },
+            {
+              "value": "picto-target",
+              "label": "Target",
+              "group": "Other"
+            },
+            {
+              "value": "picto-document",
+              "label": "Document",
+              "group": "Other"
+            },
+            {
+              "value": "picto-jewelry",
+              "label": "Jewelry",
+              "group": "Other"
+            },
+            {
+              "value": "picto-music",
+              "label": "Music",
+              "group": "Other"
+            },
+            {
+              "value": "picto-file",
+              "label": "File",
+              "group": "Other"
+            },
+            {
+              "value": "picto-mask",
+              "label": "Mask",
+              "group": "Other"
+            },
+            {
+              "value": "picto-stop",
+              "label": "Stop",
+              "group": "Other"
+            }
+          ],
+          "default": "6-digit"
+        },
+        {
+          "type": "text",
+          "id": "effect_text_1",
+          "label": "Effect Text 1"
+        },
+        {
+          "type": "select",
+          "id": "effect_icon_2",
+          "label": "Icon 2",
+          "options": [
+            {
+              "value": "6-digit",
+              "label": "6 Digit",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "vertical-storage-in-rectangle",
+              "label": "Vertical in Rectangle",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "vertical-storage",
+              "label": "Vertical Storage",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "durable-design",
+              "label": "Durable",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "mobile-wheels",
+              "label": "Mobile Wheels",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "weight",
+              "label": "Weight",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "adjust-knobs",
+              "label": "Adjust Knobs",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "knee-injuries",
+              "label": "Knee Injuries",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "simple-footprint",
+              "label": "Simple Footprint",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "51%",
+              "label": "51%",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "14-levels",
+              "label": "14 Levels",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "12-heights",
+              "label": "12 Heights",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "joint-impact",
+              "label": "Joint Impact",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "picto-coupon",
+              "label": "Coupon",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-percent",
+              "label": "Percent",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-gift",
+              "label": "Gift",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-star",
+              "label": "Star",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-like",
+              "label": "Like",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-building",
+              "label": "Building",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-love",
+              "label": "Love",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-award-gift",
+              "label": "Award gift",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-happy",
+              "label": "Happy",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-box",
+              "label": "Box",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-pin",
+              "label": "Pin",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-timer",
+              "label": "Timer",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-validation",
+              "label": "Validation",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-truck",
+              "label": "Truck",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-return",
+              "label": "Return",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-earth",
+              "label": "Earth",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-plane",
+              "label": "Plane",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-credit-card",
+              "label": "Credit card",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-lock",
+              "label": "Lock",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-shield",
+              "label": "Shield",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-secure-profile",
+              "label": "Secure profile",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-money",
+              "label": "Money",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-recycle",
+              "label": "Recycle",
+              "group": "Ecology"
+            },
+            {
+              "value": "picto-leaf",
+              "label": "Leaf",
+              "group": "Ecology"
+            },
+            {
+              "value": "picto-tree",
+              "label": "Tree",
+              "group": "Ecology"
+            },
+            {
+              "value": "picto-mobile-phone",
+              "label": "Mobile phone",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-phone",
+              "label": "Phone",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-chat",
+              "label": "Chat",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-customer-support",
+              "label": "Customer support",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-operator",
+              "label": "Operator",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-mailbox",
+              "label": "Mailbox",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-envelope",
+              "label": "Envelope",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-comment",
+              "label": "Comment",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-question",
+              "label": "Question",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-send",
+              "label": "Send",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-at-sign",
+              "label": "At sign",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-camera",
+              "label": "Camera",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-wifi",
+              "label": "WiFi",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-bluetooth",
+              "label": "Bluetooth",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-printer",
+              "label": "Printer",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-smart-watch",
+              "label": "Smart watch",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-coffee",
+              "label": "Coffee",
+              "group": "Food & Drink"
+            },
+            {
+              "value": "picto-burger",
+              "label": "Burger",
+              "group": "Food & Drink"
+            },
+            {
+              "value": "picto-beer",
+              "label": "Beer",
+              "group": "Food & Drink"
+            },
+            {
+              "value": "picto-target",
+              "label": "Target",
+              "group": "Other"
+            },
+            {
+              "value": "picto-document",
+              "label": "Document",
+              "group": "Other"
+            },
+            {
+              "value": "picto-jewelry",
+              "label": "Jewelry",
+              "group": "Other"
+            },
+            {
+              "value": "picto-music",
+              "label": "Music",
+              "group": "Other"
+            },
+            {
+              "value": "picto-file",
+              "label": "File",
+              "group": "Other"
+            },
+            {
+              "value": "picto-mask",
+              "label": "Mask",
+              "group": "Other"
+            },
+            {
+              "value": "picto-stop",
+              "label": "Stop",
+              "group": "Other"
+            }
+          ],
+          "default": "6-digit"
+        },
+        {
+          "type": "text",
+          "id": "effect_text_2",
+          "label": "Effect Text 2"
+        },
+        {
+          "type": "select",
+          "id": "effect_icon_3",
+          "label": "Icon 3",
+          "options": [
+            {
+              "value": "6-digit",
+              "label": "6 Digit",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "vertical-storage-in-rectangle",
+              "label": "Vertical in Rectangle",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "vertical-storage",
+              "label": "Vertical Storage",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "durable-design",
+              "label": "Durable",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "mobile-wheels",
+              "label": "Mobile Wheels",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "weight",
+              "label": "Weight",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "adjust-knobs",
+              "label": "Adjust Knobs",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "knee-injuries",
+              "label": "Knee Injuries",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "simple-footprint",
+              "label": "Simple Footprint",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "51%",
+              "label": "51%",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "14-levels",
+              "label": "14 Levels",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "12-heights",
+              "label": "12 Heights",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "joint-impact",
+              "label": "Joint Impact",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "picto-coupon",
+              "label": "Coupon",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-percent",
+              "label": "Percent",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-gift",
+              "label": "Gift",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-star",
+              "label": "Star",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-like",
+              "label": "Like",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-building",
+              "label": "Building",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-love",
+              "label": "Love",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-award-gift",
+              "label": "Award gift",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-happy",
+              "label": "Happy",
+              "group": "Shop"
+            },
+            {
+              "value": "picto-box",
+              "label": "Box",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-pin",
+              "label": "Pin",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-timer",
+              "label": "Timer",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-validation",
+              "label": "Validation",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-truck",
+              "label": "Truck",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-return",
+              "label": "Return",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-earth",
+              "label": "Earth",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-plane",
+              "label": "Plane",
+              "group": "Shipping"
+            },
+            {
+              "value": "picto-credit-card",
+              "label": "Credit card",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-lock",
+              "label": "Lock",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-shield",
+              "label": "Shield",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-secure-profile",
+              "label": "Secure profile",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-money",
+              "label": "Money",
+              "group": "Payment & Security"
+            },
+            {
+              "value": "picto-recycle",
+              "label": "Recycle",
+              "group": "Ecology"
+            },
+            {
+              "value": "picto-leaf",
+              "label": "Leaf",
+              "group": "Ecology"
+            },
+            {
+              "value": "picto-tree",
+              "label": "Tree",
+              "group": "Ecology"
+            },
+            {
+              "value": "picto-mobile-phone",
+              "label": "Mobile phone",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-phone",
+              "label": "Phone",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-chat",
+              "label": "Chat",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-customer-support",
+              "label": "Customer support",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-operator",
+              "label": "Operator",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-mailbox",
+              "label": "Mailbox",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-envelope",
+              "label": "Envelope",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-comment",
+              "label": "Comment",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-question",
+              "label": "Question",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-send",
+              "label": "Send",
+              "group": "Communication"
+            },
+            {
+              "value": "picto-at-sign",
+              "label": "At sign",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-camera",
+              "label": "Camera",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-wifi",
+              "label": "WiFi",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-bluetooth",
+              "label": "Bluetooth",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-printer",
+              "label": "Printer",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-smart-watch",
+              "label": "Smart watch",
+              "group": "Tech"
+            },
+            {
+              "value": "picto-coffee",
+              "label": "Coffee",
+              "group": "Food & Drink"
+            },
+            {
+              "value": "picto-burger",
+              "label": "Burger",
+              "group": "Food & Drink"
+            },
+            {
+              "value": "picto-beer",
+              "label": "Beer",
+              "group": "Food & Drink"
+            },
+            {
+              "value": "picto-target",
+              "label": "Target",
+              "group": "Other"
+            },
+            {
+              "value": "picto-document",
+              "label": "Document",
+              "group": "Other"
+            },
+            {
+              "value": "picto-jewelry",
+              "label": "Jewelry",
+              "group": "Other"
+            },
+            {
+              "value": "picto-music",
+              "label": "Music",
+              "group": "Other"
+            },
+            {
+              "value": "picto-file",
+              "label": "File",
+              "group": "Other"
+            },
+            {
+              "value": "picto-mask",
+              "label": "Mask",
+              "group": "Other"
+            },
+            {
+              "value": "picto-stop",
+              "label": "Stop",
+              "group": "Other"
+            }
+          ],
+          "default": "6-digit"
+        },
+        {
+          "type": "text",
+          "id": "effect_text_3",
+          "label": "Effect Text 3"
+        }
+      ]
+    },
+    {
+      "type": "components",
+      "name": "Components",
+      "settings": [
+        {
+          "type": "text",
+          "id": "component_title_1",
+          "label": "Component Title 1",
+          "default": "01"
+        },
+        {
+          "type": "text",
+          "id": "component_text_1",
+          "label": "Component Text 1",
+          "default": "NORDIC BENCH"
+        },
+        {
+          "type": "text",
+          "id": "component_title_2",
+          "label": "Component Title 2",
+          "default": "02"
+        },
+        {
+          "type": "text",
+          "id": "component_text_2",
+          "label": "Component Text 2",
+          "default": "BACK EXTENSION"
+        },
+        {
+          "type": "text",
+          "id": "component_title_3",
+          "label": "Component Title 3",
+          "default": "03"
+        },
+        {
+          "type": "text",
+          "id": "component_text_3",
+          "label": "Component Text 3",
+          "default": "GHD/ REVERSE HYPER"
+        },
+        {
+          "type": "text",
+          "id": "component_title_4",
+          "label": "Component Title 4",
+          "default": "04"
+        },
+        {
+          "type": "text",
+          "id": "component_text_4",
+          "label": "Component Text 4",
+          "default": "DECLINE SIT-UP"
+        },
+        {
+          "type": "text",
+          "id": "component_title_5",
+          "label": "Component Title 5",
+          "default": "05"
+        },
+        {
+          "type": "text",
+          "id": "component_text_5",
+          "label": "Component Text 5",
+          "default": "BACK EXTENSION"
+        },
+        {
+          "type": "text",
+          "id": "component_title_6",
+          "label": "Component Title 6",
+          "default": "06"
+        },
+        {
+          "type": "text",
+          "id": "component_text_6",
+          "label": "Component Text 6",
+          "default": "GHD/ REVERSE HYPER"
+        }
+      ]
+    },
+    {
+      "type": "reason-image",
+      "name": "Reason Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "reason_image",
+          "label": "Reason Image"
+        },
+        {
+          "type": "header",
+          "content": "Description 1",
+          "info": "Description contains 1 text and 1 image"
+        },
+        {
+          "type": "richtext",
+          "id": "desc_text_1",
+          "label": "Desc Text 1"
+        },
+        {
+          "type": "image_picker",
+          "id": "desc_image_1",
+          "label": "Desc Image 1"
+        },
+        {
+          "type": "range",
+          "min": 0,
+          "max": 100,
+          "id": "desc_container_top_1",
+          "label": "Desc Container 1 Top Position(%)",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "min": 0,
+          "max": 100,
+          "id": "desc_container_left_1",
+          "label": "Desc Container 1 Left Position(%)",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "min": 0,
+          "max": 100,
+          "id": "desc_container_top_mobile_1",
+          "label": "Mobile Desc Container 1 Top Position(%)",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "min": 0,
+          "max": 100,
+          "id": "desc_container_left_mobile_1",
+          "label": "Mobile Desc Container 1 Left Position(%)",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "min": -200,
+          "max": 200,
+          "id": "desc_image_top_1",
+          "label": "Desc Image Top Position(px)",
+          "step": 5,
+          "default": 0
+        },
+        {
+          "type": "range",
+          "min": -200,
+          "max": 200,
+          "id": "desc_image_left_1",
+          "label": "Desc Image Left Position(px)",
+          "step": 5,
+          "default": 0
+        },
+        {
+          "type": "header",
+          "content": "Description 2",
+          "info": "Description contains 1 text and 1 image"
+        },
+        {
+          "type": "richtext",
+          "id": "desc_text_2",
+          "label": "Desc Text 2"
+        },
+        {
+          "type": "image_picker",
+          "id": "desc_image_2",
+          "label": "Desc Image 2"
+        },
+        {
+          "type": "range",
+          "min": 0,
+          "max": 100,
+          "id": "desc_container_top_2",
+          "label": "Desc Container 2 Top Position(%)",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "min": 0,
+          "max": 100,
+          "id": "desc_container_left_2",
+          "label": "Desc Container 2 Left Position(%)",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "min": 0,
+          "max": 100,
+          "id": "desc_container_top_mobile_2",
+          "label": "Mobile Desc Container 2 Top Position(%)",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "min": 0,
+          "max": 100,
+          "id": "desc_container_left_mobile_2",
+          "label": "Mobile Desc Container 2 Left Position(%)",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "min": -200,
+          "max": 200,
+          "id": "desc_image_top_2",
+          "label": "Desc Image Top Position(px)",
+          "step": 5,
+          "default": 0
+        },
+        {
+          "type": "range",
+          "min": -200,
+          "max": 200,
+          "id": "desc_image_left_2",
+          "label": "Desc Image Left Position(px)",
+          "step": 5,
+          "default": 0
+        },
+        {
+          "type": "color",
+          "id": "desc_text_color",
+          "label": "Desc Text Color"
+        },
+        {
+          "type": "range",
+          "min": 8,
+          "max": 100,
+          "id": "desc_text_size",
+          "label": "Desc Text Font Size(px)",
+          "default": 16
+        },
+        {
+          "type": "header",
+          "content": "Badge 1",
+          "info": "Badge contains 1 icon and 1 text"
+        },
+        {
+          "type": "select",
+          "id": "badge_icon_1",
+          "label": "Badge Icon 1",
+          "options": [
+            {
+              "value": "6-digit",
+              "label": "6 Digit",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "vertical-storage-in-rectangle",
+              "label": "Vertical in Rectangle",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "vertical-storage",
+              "label": "Vertical Storage",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "durable-design",
+              "label": "Durable",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "mobile-wheels",
+              "label": "Mobile Wheels",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "weight",
+              "label": "Weight",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "adjust-knobs",
+              "label": "Adjust Knobs",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "knee-injuries",
+              "label": "Knee Injuries",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "simple-footprint",
+              "label": "Simple Footprint",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "51%",
+              "label": "51%",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "14-levels",
+              "label": "14 Levels",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "12-heights",
+              "label": "12 Heights",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "joint-impact",
+              "label": "Joint Impact",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "thumb-up",
+              "label": "Thumb Up",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "thumb-down",
+              "label": "Thumb Down",
+              "group": "6 Reasons"
+            }
+          ],
+          "default": "thumb-up"
+        },
+        {
+          "type": "text",
+          "id": "badge_text_1",
+          "label": "Badge Text 1"
+        },
+        {
+          "type": "range",
+          "min": 0,
+          "max": 100,
+          "id": "badge_top_1",
+          "label": "Badge Container 1 Top Position(%)",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "min": 0,
+          "max": 100,
+          "id": "badge_left_1",
+          "label": "Badge Container 1 Left Position(%)",
+          "default": 50
+        },
+        {
+          "type": "color",
+          "id": "badge_text_color_1",
+          "label": "Badge Text Color 1"
+        },
+        {
+          "type": "color",
+          "id": "badge_back_color_1",
+          "label": "Badge Background Color 1"
+        },
+        {
+          "type": "header",
+          "content": "Badge 2",
+          "info": "Badge contains 1 icon and 1 text"
+        },
+        {
+          "type": "select",
+          "id": "badge_icon_2",
+          "label": "Badge Icon 2",
+          "options": [
+            {
+              "value": "6-digit",
+              "label": "6 Digit",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "vertical-storage-in-rectangle",
+              "label": "Vertical in Rectangle",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "vertical-storage",
+              "label": "Vertical Storage",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "durable-design",
+              "label": "Durable",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "none",
+              "label": "None"
+            },
+            {
+              "value": "mobile-wheels",
+              "label": "Mobile Wheels",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "weight",
+              "label": "Weight",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "adjust-knobs",
+              "label": "Adjust Knobs",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "knee-injuries",
+              "label": "Knee Injuries",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "simple-footprint",
+              "label": "Simple Footprint",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "51%",
+              "label": "51%",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "14-levels",
+              "label": "14 Levels",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "12-heights",
+              "label": "12 Heights",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "joint-impact",
+              "label": "Joint Impact",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "thumb-up",
+              "label": "Thumb Up",
+              "group": "6 Reasons"
+            },
+            {
+              "value": "thumb-down",
+              "label": "Thumb Down",
+              "group": "6 Reasons"
+            }
+          ],
+          "default": "thumb-up"
+        },
+        {
+          "type": "text",
+          "id": "badge_text_2",
+          "label": "Badge Text 2"
+        },
+        {
+          "type": "range",
+          "min": 0,
+          "max": 100,
+          "id": "badge_top_2",
+          "label": "Badge Container 2 Top Position(%)",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "min": 0,
+          "max": 100,
+          "id": "badge_left_2",
+          "label": "Badge Container 2 Left Position(%)",
+          "default": 50
+        },
+        {
+          "type": "color",
+          "id": "badge_text_color_2",
+          "label": "Badge Text Color 2"
+        },
+        {
+          "type": "color",
+          "id": "badge_back_color_2",
+          "label": "Badge Background Color 2"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Reason Box(FA)",
+      "blocks": [
+        {
+          "type": "title"
+        },
+        {
+          "type": "subtitle"
+        },
+        {
+          "type": "description"
+        },
+        {
+          "type": "reason-image"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

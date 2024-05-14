@@ -1,0 +1,62 @@
+<script type="module">
+  import {fetchCart} from "{{ 'theme.js' | asset_url }}";
+
+  // custom GTM events
+  ((w,d) => {
+    w.dataLayer = w.dataLayer || [];
+
+    const start_gtm_trigger = () => {
+      d.addEventListener('variant:add', ({detail:{cart}}) => {
+        w.dataLayer.push({
+          event: 'cart:item_added',
+          cart: mutate_cart(cart)
+        })
+      });
+      d.addEventListener('line-item:change', ({detail:{cart}}) => {
+        w.dataLayer.push({
+          event: 'cart:item_updated',
+          cart: mutate_cart(cart)
+        })
+      });
+      Array.from(d.querySelectorAll('form[action^="/contact"]')).forEach(item => item.addEventListener('submit', (e) => {
+        w.dataLayer.push({event: 'form:contact_submit'});
+      }));
+      Array.from(d.querySelectorAll('button[name="checkout"]')).forEach(item => item.closest('form').addEventListener('submit', async (e) => {
+        const cart = await fetchCart;
+        w.dataLayer.push({
+          event: 'cart:checkout',
+          cart: mutate_cart(cart)
+        })
+      }))
+      Array.from(d.querySelectorAll('[href^="/cart"]')).forEach(item => item.addEventListener('click', (e) => {
+        w.dataLayer.push({event: 'cart:view'});
+      }))
+    }
+
+    const mutate_cart = (cart) => {
+      console.log(cart)
+      return {
+        currency: cart.currency,
+        item_count: cart.item_count,
+        items: cart.items.length ? cart.items.map(item => ({
+          product_id: item.product_id,
+          variant_id: item.variant_id,
+          title: item.title,
+          line_price: item.line_price,
+          quantity: item.quantity
+        })) : null,
+        items_subtotal_price: cart.items_subtotal_price,
+        original_total_price: cart.original_total_price,
+        total_discount: cart.total_discount,
+        total_price: cart.total_price
+      }
+    }
+
+    // check if DOM ready
+    if (d.readyState === "loading") {
+      d.addEventListener("DOMContentLoaded", start_gtm_trigger);
+    } else {
+      start_gtm_trigger();
+    }
+  })(window,document)
+</script>

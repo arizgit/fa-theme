@@ -1,0 +1,498 @@
+{%- render 'section-spacing-collapsing' -%}
+
+<style>
+  #shopify-section-{{ section.id }} {
+    --product-grid: auto / minmax(0, 1fr);
+    --product-gallery-media-list-grid: auto / auto-flow {% if section.settings.mobile_carousel_control == 'free_scroll' %}{% if section.settings.mobile_media_size == 'expanded' %}84vw{% else %}73vw{% endif %}{% else %}100%{% endif %};
+    --product-gallery-media-list-gap: {% if section.settings.mobile_media_size == 'expanded' %}var(--spacing-0-5){% else %}var(--grid-gutter){% endif %};
+    padding-top: {{ section.settings.padding_top }}rem;
+    padding-bottom: {{ section.settings.padding_bottom }}rem;
+  }
+
+  @media screen and (max-width: 999px) {
+    #shopify-section-{{ section.id }} {
+      --section-spacing-block-start: {% if section.settings.mobile_media_size == 'expanded' %}0px{% else %}var(--container-gutter){% endif %};
+    }
+  }
+
+  @media screen and (min-width: 1000px) {
+    #shopify-section-{{ section.id }} {
+      {%- assign media_ratio = section.settings.desktop_media_width | divided_by: 50.0 -%}
+      --product-grid: auto / minmax(0, {{ media_ratio }}fr) minmax(0, {{ 2.0 | minus: media_ratio }}fr);
+      --product-gallery-media-list-grid: {% if section.settings.desktop_media_layout contains 'grid' %}auto-flow dense / repeat(2, minmax(0, 1fr)){% else %}auto / auto-flow 100%{% endif %};
+      --product-gallery-media-list-gap: calc(var(--grid-gutter) / 2);
+    }
+
+    {%- if section.settings.desktop_media_layout == 'grid_highlight' -%}
+      #shopify-section-{{ section.id }} .product-gallery__media-list > :not([hidden]) {
+        grid-column: span 2;
+      }
+
+      #shopify-section-{{ section.id }} .product-gallery__media-list > :not([hidden]) ~ *:not(.product-gallery__media--expand) {
+        grid-column: span 1;
+      }
+    {%- endif -%}
+  }
+
+  @media screen and (min-width: 1400px) {
+    #shopify-section-{{ section.id }} {
+      --product-gallery-media-list-gap: var(--grid-gutter);
+    }
+  }
+
+  .shopify-section--product-feature {
+    background-color: {{ section.settings.background_color }} !important;
+    background-image: {{ section.settings.background_gradient }};
+    color: {{ section.settings.text_color }};
+  }
+  .product-feature-section {
+    max-width: 1200px;
+    width: 1200px;
+    margin: 0 auto;
+    padding: 0rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .product-feature-content {
+    width: 50%;
+  }
+
+  .product-feature-content h2 {
+    font-size: 42px;
+    line-height: 1.2;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .product-feature-description {
+    font-size: 16px;
+    margin-bottom: 2rem;
+  }
+
+  .product-feature-image {
+    width: 100%;
+  }
+
+  .product-feature-action .buy_button {
+    background-color: #ff3a00;
+    color: #ffffff;
+    text-transform: uppercase;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    text-decoration: none; /* Removes underline from the link */
+    cursor: pointer; /* Indicates that the button is clickable */
+    transition: background-color 0.3s ease; /* Smooth background color change on hover */
+  }
+
+  .product-feature-action .buy_button:hover {
+    background-color: #e03500;
+  }
+
+  .feature-desktop-view {
+    position: relative;
+    margin-bottom: -80px;
+    margin-top: -200px;
+  }
+  .feature-desktop-view .desktop-image {
+    width: 800px;
+    margin: auto;
+    height: auto;
+  }
+  .desktop-image-1 {
+    position: absolute;
+    top: 210px;
+    left: 280px;
+  }
+  .desktop-image-2 {
+    position: absolute;
+    top: 260px;
+    left: 850px;
+  }
+  .desktop-image-3 {
+    position: absolute;
+    top: 610px;
+    left: 500px;
+  }
+  .desktop-image-4 {
+    position: absolute;
+    top: 590px;
+    left: 880px;
+  }
+  .desktop-text-1 {
+    width: 150px;
+    position: absolute;
+    top: 200px;
+    left: 120px;
+    text-align: right;
+  }
+  .desktop-text-2 {
+    position: absolute;
+    top: 245px;
+    left: 960px;
+    width: 213px;
+    text-align: left;
+  }
+  .desktop-text-3 {
+    position: absolute;
+    width: 198px;
+    text-align: right;
+    top: 613px;
+    left: 290px;
+  }
+  .desktop-text-4 {
+    position: absolute;
+    width: 198px;
+    text-align: left;
+    top: 592px;
+    left: 970px;
+  }
+
+  @media (min-width: 769px) {
+    .feature-mobile-view {
+      display: none;
+    }
+  }
+
+  @media (max-width: 1200px) {
+    .product-feature-section {
+      width: 800px;
+    }
+    .feature-desktop-view {
+      margin-bottom: 0px;
+      margin-top: -100px;  
+    }
+    .feature-desktop-view .desktop-image {
+      width: 600px;
+    }
+    .desktop-image-1 {
+      top: 136px;
+      left: 110px;
+    }
+    .desktop-image-2 {
+      top: 175px;
+      left: 580px;
+    }
+    .desktop-image-3 {
+      top: 465px;
+      left: 273px;
+    }
+    .desktop-image-4 {
+      top: 430px;
+      left: 613px;
+    }
+    .desktop-text-1 {
+      top: 125px;
+      left: -45px;
+    }
+    .desktop-text-2 {
+      top: 164px;
+      left: 686px;
+    }
+    .desktop-text-3 {
+      top: 468px;
+      left: 70px;
+    }
+    .desktop-text-4 {
+      top: 432px;
+      left: 702px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    #shopify-section-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top_mobile }}rem;
+      padding-bottom: {{ section.settings.padding_bottom_mobile }}rem;
+      padding-right: 2rem;
+      padding-left: 2rem;
+    }
+    .product-feature-content {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .product-feature-description {
+      font-size: 18px;
+      line-height: 1.8;
+      width: 80%;
+      margin-bottom: 2rem;
+    }
+    .product-feature-content h2 {
+      font-size: 32px;
+      width: 80%;
+      font-weight: 500;
+    }
+    .product-feature-section {
+      flex-direction: column;
+      width: 100%;
+    }
+    .feature-desktop-view {
+      display: none;
+    }
+    .feature-mobile-view {
+      position: relative;
+      font-size: 14px;
+      width: 330px;
+      margin: auto;
+      margin-bottom: 50px;
+    }
+    .feature-mobile-view p {
+      position: absolute;
+      text-align: left;
+      width: 124px;
+    }
+    .mobile-image-1 {
+      position: absolute;
+      top: 55px;
+      left: 50px;
+    }
+    .mobile-image-2 {
+      position: absolute;
+      top: 62px;
+      left: 251px
+    }
+    .mobile-image-3 {
+      top: 245px;
+      position: absolute;
+      left: 117px;
+    }
+    .mobile-image-4 {
+      position: absolute;
+      left: 250px;
+      top: 263px;
+    }
+    .mobile-text-1 {
+      top: 9px;
+      left: 40px;
+    }
+    .mobile-text-2 {
+      top: -27px;
+      left: 225px;
+    }
+    .mobile-text-3 {
+      left: -5px;
+      top: 260px;
+    }
+    .mobile-text-4 {
+      left: 242px;
+      top: 322px;
+    }
+    .product-feature-content {
+      width: 100%;
+    }
+    .product-info__buy-buttons {
+      width: 100%;
+      height: 52px;
+    }
+  }
+</style>
+
+{%- capture product_form_id -%}product-form-{{ product.id }}{%- endcapture -%}
+
+{% if section.settings.image %}
+  <div class="product-feature-section">
+    <div class="product-feature-content">
+      <h2>{{ section.settings.title }}</h2>
+      <div class="product-feature-description">{{ section.settings.description }}</div>
+    </div>
+    <div class="product-feature-image">
+      <div class="feature-desktop-view">
+        <img class="desktop-image" src="{{ section.settings.image | image_url}}" alt="{{ section.settings.title }}" />
+        <img class="desktop-image-1" src="{{ 'desktop1.png' | asset_url}}" alt="{{ section.settings.title }}" />
+        <img class="desktop-image-2" src="{{ 'desktop2.png' | asset_url}}" alt="{{ section.settings.title }}" />
+        <img class="desktop-image-3" src="{{ 'desktop3.png' | asset_url}}" alt="{{ section.settings.title }}" />
+        <img class="desktop-image-4" src="{{ 'desktop4.png' | asset_url}}" alt="{{ section.settings.title }}" />
+        <p class="desktop-text-1">{{ section.settings.attachment_1 }}</p>
+        <p class="desktop-text-2">{{ section.settings.attachment_2 }}</p>
+        <p class="desktop-text-3">{{ section.settings.attachment_3 }}</p>
+        <p class="desktop-text-4">{{ section.settings.attachment_4 }}</p>
+      </div>
+      <div class="feature-mobile-view">
+        <img class="mobile-image" src="{{ section.settings.mobile_image | image_url}}" alt="{{ section.settings.title }}" />
+        <img class="mobile-image-1" src="{{ 'mobile1.png' | asset_url}}" alt="{{ section.settings.title }}" />
+        <img class="mobile-image-2" src="{{ 'mobile2.png' | asset_url}}" alt="{{ section.settings.title }}" />
+        <img class="mobile-image-3" src="{{ 'mobile3.png' | asset_url}}" alt="{{ section.settings.title }}" />
+        <img class="mobile-image-4" src="{{ 'mobile4.png' | asset_url}}" alt="{{ section.settings.title }}" />
+        <p class="mobile-text-1">{{ section.settings.attachment_1 }}</p>
+        <p class="mobile-text-2">{{ section.settings.attachment_2 }}</p>
+        <p class="mobile-text-3">{{ section.settings.attachment_3 }}</p>
+        <p class="mobile-text-4">{{ section.settings.attachment_4 }}</p>
+      </div>
+    </div>
+    {%- if section.settings.button_text != blank -%}
+      {% comment %} {% render 'button', content: section.settings.button_text, href: section.settings.button_url %} {% endcomment %}
+      <div class="product-info__buy-buttons" style="--mobile-order:{{ block.settings.position_order }}" {{ block.shopify_attributes }}>
+        {%- render 'buy-buttons',
+          product: product,
+          form_id: product_form_id,
+          button_size: 'base',
+          button_text: section.settings.button_text
+        -%}
+      </div>
+    {%- endif -%}
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Product Feature(FA)",
+  "class": "shopify-section--product-feature",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Meet the all new Leg Developer Attachment"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>The ultimate companion for your Nordic Hyper workout experience. Seamlessly mount it onto your Nordic Hyper in just 20 seconds, and revolutionize your leg training regimen.</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "3200 x 1600px .jpg recommended"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile image",
+      "info": "1300 x 1500px .jpg recommended. Default to desktop image."
+    },
+    {
+      "type": "text",
+      "id": "attachment_1",
+      "label": "Attachment Text 1",
+      "default": "Works on All Nordic Hypers"
+    },
+    {
+      "type": "text",
+      "id": "attachment_2",
+      "label": "Attachment Text 2",
+      "default": "Adjustable Height for Leg Extension and Hamstring Curl Rollers"
+    },
+    {
+      "type": "text",
+      "id": "attachment_3",
+      "label": "Attachment Text 3",
+      "default": "Attach and remove from the Nordic Hyper in 20 seconds"
+    },
+    {
+      "type": "text",
+      "id": "attachment_4",
+      "label": "Attachment Text 4",
+      "default": "220lbs weight capacity"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "ADD TO BAG FOR ONLY $199.99"
+    },
+    {
+      "type": "header",
+      "content": "Custom top and bottom padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Top Padding",
+      "info": "Desktop",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Bottom Padding",
+      "info": "Desktop",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Top Padding",
+      "info": "Mobile & tablet",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Bottom Padding",
+      "info": "Mobile & tablet",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "header",
+      "content": "Colors",
+      "info": "Gradient replaces solid colors when set."
+    },
+    {
+      "type": "color_scheme",
+      "id": "scheme",
+      "label": "Color Scheme"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text"
+    },
+    {
+      "type": "header",
+      "content": "Input colors",
+      "info": "Applies to elements like quantity selector and variant selectors."
+    },
+    {
+      "type": "color",
+      "id": "input_background",
+      "label": "Background",
+      "default": "rgba(0,0,0,0)"
+    },
+    {
+      "type": "color",
+      "id": "input_text_color",
+      "label": "Text"
+    }
+  ],
+  "blocks": [],
+  "presets": [
+    {
+      "name": "Product Feature(FA)"
+    }
+  ]
+}
+{% endschema %}

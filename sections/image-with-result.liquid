@@ -1,0 +1,382 @@
+{%- render 'section-spacing-collapsing' -%}
+
+<style>
+  #shopify-section-{{ section.id }} {
+    --product-grid: auto / minmax(0, 1fr);
+    --product-gallery-media-list-grid: auto / auto-flow {% if section.settings.mobile_carousel_control == 'free_scroll' %}{% if section.settings.mobile_media_size == 'expanded' %}84vw{% else %}73vw{% endif %}{% else %}100%{% endif %};
+    --product-gallery-media-list-gap: {% if section.settings.mobile_media_size == 'expanded' %}var(--spacing-0-5){% else %}var(--grid-gutter){% endif %};
+    padding-top: {{ section.settings.padding_top }}rem;
+    padding-bottom: {{ section.settings.padding_bottom }}rem;
+  }
+
+  @media screen and (max-width: 999px) {
+    #shopify-section-{{ section.id }} {
+      --section-spacing-block-start: {% if section.settings.mobile_media_size == 'expanded' %}0px{% else %}var(--container-gutter){% endif %};
+    }
+  }
+
+  @media screen and (min-width: 1000px) {
+    #shopify-section-{{ section.id }} {
+      {%- assign media_ratio = section.settings.desktop_media_width | divided_by: 50.0 -%}
+      --product-grid: auto / minmax(0, {{ media_ratio }}fr) minmax(0, {{ 2.0 | minus: media_ratio }}fr);
+      --product-gallery-media-list-grid: {% if section.settings.desktop_media_layout contains 'grid' %}auto-flow dense / repeat(2, minmax(0, 1fr)){% else %}auto / auto-flow 100%{% endif %};
+      --product-gallery-media-list-gap: calc(var(--grid-gutter) / 2);
+    }
+
+    {%- if section.settings.desktop_media_layout == 'grid_highlight' -%}
+      #shopify-section-{{ section.id }} .product-gallery__media-list > :not([hidden]) {
+        grid-column: span 2;
+      }
+
+      #shopify-section-{{ section.id }} .product-gallery__media-list > :not([hidden]) ~ *:not(.product-gallery__media--expand) {
+        grid-column: span 1;
+      }
+    {%- endif -%}
+  }
+
+  .shopify-section--image-result {
+    background-color: {{ section.settings.background_color }} !important;
+    background-image: {{ section.settings.background_gradient }};
+    color: {{ section.settings.text_color }};
+    
+  }
+
+  @media screen and (min-width: 1400px) {
+    #shopify-section-{{ section.id }} {
+      --product-gallery-media-list-gap: var(--grid-gutter);
+    }
+  }
+
+  #shopify-section-{{ section.id }} {
+    display: flex;
+    justify-content: center;
+  }
+
+  .image-result-section {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: space-between;
+    width: 1200px;
+  }
+
+  .image-result-header-{{ section.id }} {
+    text-align: center;
+    margin-top: 50px;
+    margin-bottom: 40px;
+  }
+
+  .image-result-header-{{ section.id }} h6 {
+    color: {{ section.settings.scheme.settings._primary_button }};
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.5;
+    padding-bottom: 10px;
+  }
+
+  .image-result-header-{{ section.id }} h2 {
+    width: 550px;
+    font-size: 42px;
+    font-weight: 600;
+    line-height: 1.1;
+    color: {{ section.settings.text_color }};
+  }
+
+  .equalse-signal-{{ section.id }} {
+    color: {{ section.settings.equalse_color }};
+    font-size: 42px;
+    font-weight: 600;
+  }
+
+  .image-result-description-{{ section.id }} {
+    color: {{ section.settings.text_color }};
+    font-size: 24px;
+    line-height: 1.5;
+    width: 280px;
+    text-align: center;
+  }
+
+  .result-desktop-view {
+    position: relative;
+  }
+
+  .image-text-1 {
+    position: absolute;
+    bottom: 32px;
+    font-size: 24px;
+    left: 46px;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+  }
+
+  .image-text-2 {
+    position: absolute;
+    bottom: 32px;
+    font-size: 24px;
+    right: 37px;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+  }
+
+  @media (min-width: 769px) {
+    .result-mobile-view {
+      display: none;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .result-desktop-view {
+      display: none;
+    }
+
+    #shopify-section-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top_mobile }}rem;
+      padding-bottom: {{ section.settings.padding_bottom_mobile }}rem;
+      padding-right: 2rem;
+      padding-left: 2rem;
+    }
+
+    .image-result-section {
+      width: 100%;
+    }
+
+    .image-result-header-{{ section.id }} h2 {
+      width: 100%;
+      font-size: 32px;
+      font-weight: 500;
+    }
+
+    .equalse-signal-{{ section.id }} {
+      font-size: 32px;
+    }
+
+    .result-mobile-view {
+      display: flex;
+      width: 100%;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .result-mobile-view img {
+      width: 100%;
+      border-radius: 12px;
+    }
+
+    .result-image-with-text {
+      position: relative;
+    }
+
+    .result-image-with-text .mobile-image-text {
+      position: absolute;
+      bottom: 16px;
+      font-size: 18px;
+      left: 26px;
+      letter-spacing: 0.5px;
+      color: #ffffff;
+    }
+
+    .plus-signal {
+      color: #F15729;
+      font-size: 42px;
+      font-weight: 600;
+      width: 56px;
+      height: 56px;
+      background: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 15px 0px;
+    }
+  }
+</style>
+
+<div class="image-result-section">
+  {%- assign show_image = section.settings.image -%}
+  <div class="image-result-header-{{ section.id }}">
+    <h6>{{ section.settings.subtitle }}</h6>
+    <h2>{{ section.settings.title }}</h2>
+  </div>
+  <div class="result-desktop-view">
+    {{- show_image | image_url: width: show_image.width | image_tag: loading: 'lazy' -}}
+    <p class="image-text-1">{{ section.settings.image_text_1 }}</p>
+    <p class="image-text-2">{{ section.settings.image_text_2 }}</p>
+  </div>
+  <div class="result-mobile-view">
+    <div class="result-image-with-text">
+      <img src="{{ section.settings.mobile_image_1 | image_url }}" />
+      <p class="mobile-image-text">{{ section.settings.image_text_mobile_1 }}</p>
+    </div>
+    <p class="plus-signal">+</p>
+    <div class="result-image-with-text">
+      <img src="{{ section.settings.mobile_image_2 | image_url }}" />
+      <p class="mobile-image-text">{{ section.settings.image_text_mobile_2 }}</p>
+    </div>
+  </div>
+  <p class="equalse-signal-{{ section.id }}">=</p>
+  <p class="image-result-description-{{ section.id }}">{{ section.settings.description }}</p>
+</div>
+
+{% schema %}
+{
+  "name": "Result with Image(FA)",
+  "class": "shopify-section--image-result",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "SubTitle"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "image_text_1",
+      "label": "Image Text 1",
+      "default": "Reverse Nordics"
+    },
+    {
+      "type": "text",
+      "id": "image_text_2",
+      "label": "Image Text 2",
+      "default": "Leg Extensions"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image_1",
+      "label": "Mobile Image 1"
+    },
+    {
+      "type": "text",
+      "id": "image_text_mobile_1",
+      "label": "Mobile Image Text 1",
+      "default": "Reverse Nordics"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image_2",
+      "label": "Mobile Image 2"
+    },
+    {
+      "type": "text",
+      "id": "image_text_mobile_2",
+      "label": "Mobile Image Text 2",
+      "default": "Leg Extensions"
+    },
+    {
+      "type": "text",
+      "id": "description",
+      "label": "description"
+    },
+    {
+      "type": "header",
+      "content": "Custom top and bottom padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Top Padding",
+      "info": "Desktop",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Bottom Padding",
+      "info": "Desktop",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Top Padding",
+      "info": "Mobile & tablet",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Bottom Padding",
+      "info": "Mobile & tablet",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "header",
+      "content": "Colors",
+      "info": "Gradient replaces solid colors when set."
+    },
+    {
+      "type": "color_scheme",
+      "id": "scheme",
+      "label": "Color Scheme"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text"
+    },
+    {
+      "type": "color",
+      "id": "equalse_color",
+      "label": "Equalse"
+    },
+    {
+      "type": "header",
+      "content": "Input colors",
+      "info": "Applies to elements like quantity selector and variant selectors."
+    },
+    {
+      "type": "color",
+      "id": "input_background",
+      "label": "Background",
+      "default": "rgba(0,0,0,0)"
+    },
+    {
+      "type": "color",
+      "id": "input_text_color",
+      "label": "Text"
+    }
+  ],
+  "blocks": [],
+  "presets": [
+    {
+      "name": "Result with Image(FA)"
+    }
+  ]
+}
+{% endschema %}

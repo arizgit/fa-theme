@@ -1,0 +1,202 @@
+{%- render 'section-spacing-collapsing' -%}
+
+<style>
+   #shopify-section-{{ section.id }} .section {
+    padding-top: {{section.settings.section_spacing_desk}}rem;
+    padding-bottom: {{section.settings.section_spacing_desk}}rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  @media only screen and (max-width:768px){
+    #shopify-section-{{ section.id }} .section {
+      padding-top: {{section.settings.section_spacing_desk}}rem;
+      padding-bottom: {{section.settings.section_spacing_desk}}rem;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+  }
+  a.button.button--sm.button--width--base.button--outline.true {
+    --button-background: var(--scheme-on-outline-button-rgb) / 1;
+    --button-text-color: var(--scheme-on-outline-button-text-rgb);
+  }
+</style>
+
+<div {% render 'section-properties' %}>
+  {% for block in section.blocks %}
+    {% assign btntext = block.settings.link %}    
+    {% if request.path == btntext %}
+      {% assign btnactive = true %}
+      {% else %}
+      {% assign btnactive = false %}
+      {% endif %}
+    {%- render 'blog-tag-button',
+      content: block.settings.text,
+      href: block.settings.link,
+      size: section.settings.blog_btn_size,
+      style: section.settings.blog_btn_style,
+      width: section.settings.blog_btn_width,
+      active: btnactive
+    -%}
+  {% endfor %}
+</div>
+
+{% schema %}
+{
+    "name": "Blog tags menu",
+    "class": "shopify-section--blog-tags-menu",
+    "tag": "section",
+    "disabled_on": {
+      "templates": ["password"],
+      "groups": ["header", "custom.overlay"]
+    },
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "full_width",
+        "label": "Full width",
+        "default": true
+      },
+      {
+      "type": "range",
+      "id": "section_spacing_desk",
+      "label": "Spacing at top & bottom (Desktop)",
+      "min": 0,
+      "max": 5,
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem"
+    },
+    {
+      "type": "range",
+      "id": "section_spacing_mob",
+      "label": "Spacing at top & bottom (Mobile)",
+      "min": 0,
+      "max": 5,
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem"
+    },
+      {
+        "type": "select",
+        "id": "blog_btn_size",
+        "label": "Button size",
+        "default": "base",
+        "options": [
+            {
+            "label": "Small",
+            "value": "sm"
+            },{
+            "label": "Default",
+            "value": "base"
+            },{
+            "label": "Large",
+            "value": "lg"
+            },{
+            "label": "X-large",
+            "value": "xl"
+            }
+        ]
+        },
+      {
+        "type": "select",
+        "id": "blog_btn_width",
+        "label": "Button width",
+        "default": "base",
+        "options": [{
+          "label": "Default",
+          "value": "base"
+        },{
+          "label": "Medium",
+          "value": "md"
+        },{
+          "label": "Large",
+          "value": "lg"
+        },{
+          "label": "X-large",
+          "value": "xl"
+        }]
+      },
+      {
+        "type": "select",
+        "id": "blog_btn_style",
+        "label": "Button style",
+        "default": "fill",
+        "options": [{
+          "label":"Primary",
+          "value": "fill"
+        },{
+          "label":"Secondary",
+          "value":"secondary"
+        },{
+          "label":"Outline",
+          "value": "outline"
+        },{
+          "label":"Link",
+          "value": "link"
+        }]
+      },
+  {
+    "type": "header",
+        "content": "Colors",
+        "info": "Gradient replaces solid colors when set."
+      },
+      {
+        "type": "color_scheme",
+        "id": "scheme",
+        "label": "Color Scheme"
+      },
+      {
+        "type": "color",
+        "id": "background",
+        "label": "Background"
+      },
+      {
+        "type": "color_background",
+        "id": "background_gradient",
+        "label": "Background gradient"
+      },
+      {
+        "type": "color",
+        "id": "text_color",
+        "label": "Text"
+      },
+      {
+        "type": "color",
+        "id": "heading_color",
+        "label": "Heading color"
+      },
+      {
+        "type": "color_background",
+        "id": "heading_gradient",
+        "label": "Heading gradient"
+      }
+    ],
+  "blocks": [
+    {
+      "name": "Blog link",
+      "type": "blog_link",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Label for tag:",
+          "default": "All"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link for tag:"
+        }
+      ]
+    }
+  ],
+    "presets": [
+      {
+        "name": "Blog tags menu",
+        "category": "Custom"
+      }
+    ]
+  }
+{% endschema %}

@@ -1,0 +1,34 @@
+{% liquid
+  assign nav_id = false
+
+  if section.settings.nav_anchor_label != blank
+    assign nav_id = section.settings.nav_anchor_label
+  endif
+
+  if nav_id == false and section.settings.title != blank
+    assign nav_id = section.settings.title
+  endif
+  
+  if nav_id == false and section.settings.subheading != blank
+    assign nav_id = section.settings.subheading
+  endif
+
+  if nav_id == false and section.blocks.size > 0
+    assign heading = section.blocks | where: 'type', 'heading' | first
+    assign subheading = section.blocks | where: 'type', 'subheading' | first
+
+    if heading != blank
+      assign nav_id = heading.settings.text
+    endif
+    
+    if subheading != blank
+      assign nav_id = subheading.settings.text
+    endif
+  endif
+
+%}
+{%- if nav_id -%}
+  <div id="{{ nav_id | handleize }}" class="page-anchor" data-nav-anchor-label="{{ nav_id }}"></div>
+{%- else -%}
+  <script>console.error('no id for page-anchor:', '{{ section.id }}');</script>
+{%- endif -%}

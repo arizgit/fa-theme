@@ -1,0 +1,611 @@
+{%- if section.blocks.size > 0 -%}
+  {%- render 'page-anchor' -%}
+  {%- render 'section-spacing-collapsing' -%}
+
+  {%- comment -%}
+  ------------------------------------------------------------------------------------------------------------------------
+  CSS
+  ------------------------------------------------------------------------------------------------------------------------
+  {%- endcomment -%}
+
+  <style>
+    #shopify-section-{{ section.id }} {
+      --impact-text-auto-columns: {% if section.blocks.size == 1 %}minmax(0, 1fr){% else %}{% if section.settings.text_divider != 'none' %}48vw auto{% else %}64vw{% endif %}{% endif %};
+    }
+
+    @media screen and (min-width: 700px) {
+      #shopify-section-{{ section.id }} {
+        --impact-text-auto-columns: {% if section.settings.text_divider != 'none' %}minmax(0, 1fr) auto{% else %}minmax(0, 1fr){% endif %};
+      }
+    }
+  </style>
+
+  {%- comment -%}
+  ------------------------------------------------------------------------------------------------------------------------
+  LIQUID
+  ------------------------------------------------------------------------------------------------------------------------
+  {%- endcomment -%}
+  {% if section.settings.image != blank %}
+    {%- capture background -%}
+      {%- assign image = section.settings.image -%}
+      {%- capture sizes -%}{% if section.settings.full_width %}100vw{% else %}(max-width: 740px) calc(100vw - 40px), (max-width: 999px) calc(100vw - 64px), min({{ settings.page_width }}px, 100vw - 96px){% endif %}{%- endcapture -%}
+      <div class="impact-text-image" style="--opacity:{{ section.settings.image_opacity | append: ".0" | divided_by: 100 }};--blend-mode:{{ section.settings.image_blend_mode }}">
+      {{- image | image_url: width: image.width | image_tag: loading: 'lazy', sizes: sizes, widths: '200,300,400,500,600,700,800,900,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200' -}}
+      </div>
+    {%- endcapture -%}
+  {% endif %}
+
+  <div {% render 'section-properties' %}>
+    {{ background }}
+    {%- if section.settings.title != blank -%}
+    <header class="impact-text-header" style="--align:{{ section.settings.text_alignment }};">
+      <p class="{{ section.settings.title_class }} title-fa">{{ section.settings.title | escape }}</p>
+    </header>
+    {%- endif -%}
+    <div {% unless section.settings.stack_mobile %}class="scroll-area bleed {% if section.blocks.size < 3 %}sm:unbleed{% else %}md:unbleed{% endif %}"{% endunless %}>
+      <div class="impact-text impact-text--{{ section.settings.text_alignment }} {% unless section.settings.stack_mobile %}impact-text--scroll{% endunless %}">
+          {%- for block in section.blocks -%}
+            <div class="snap-center" {{ block.shopify_attributes }}>
+              {%- if block.settings.title != blank -%}
+                <h2 class="impact-text__text heading break-all {{ block.settings.title_class }}">
+                  <impact-text {% if block.settings.animate_impact_text %}count-up="{{ block.settings.animate_impact_text_duration }}"{% endif %} reveal-js>
+                    {%- render 'styled-text', content: block.settings.title, text_color: section.settings.heading_text_color, gradient: section.settings.heading_gradient, style: section.settings.impact_text_style -%}
+                  </impact-text>
+                </h2>
+              {%- endif -%}
+
+              {%- if block.settings.subheading != blank or block.settings.content != blank or block.settings.button_text != blank -%}
+                <div class="impact-text__content">
+                  <div class="prose">
+                    {%- if block.settings.subheading != blank -%}
+                      <p class="{{ block.settings.subheading_class }} subheading-fa">{{ block.settings.subheading | escape }}</p>
+                    {%- endif -%}
+
+                    {%- if block.settings.content != blank -%}
+                    <div class="{{ block.settings.content_class }} content-fa">
+                      {{- block.settings.content -}}
+                    </div>
+                    {%- endif -%}
+                    
+                    {%- if block.settings.button_text != blank -%}
+                      {%- assign btn_is_secondary = false -%}
+                      {%- assign btn_style = 'fill' -%}
+                      {%- case block.settings.button_style -%}
+                        {%- when 'secondary' -%}
+                          {%- assign btn_is_secondary = true -%}
+                        {%- when 'outline' -%}
+                          {%- assign btn_style = 'outline' -%}
+                      {%- endcase -%}
+                      {%- render 'button', content: block.settings.button_text, href: block.settings.button_url, size: block.settings.button_size, style: btn_style, secondary: btn_is_secondary -%}
+                    {%- endif -%}
+                  </div>
+                </div>
+              {%- endif -%}
+            </div>
+
+            {%- unless forloop.last or section.settings.text_divider == 'none' -%}
+              {%- case section.settings.text_divider -%}
+                {%- when 'square' -%}
+                  <span class="shape-square shape--lg place-self-center"></span>
+                {%- when 'circle' -%}
+                  <span class="shape-circle shape--lg place-self-center"></span>
+                {%- when 'diamond' -%}
+                  <span class="shape-diamond shape--lg place-self-center"></span>
+                {%- when 'line' -%}
+                  <span class="shape-line {% if section.settings.stack_mobile %}hidden sm:block{% endif %}"></span>
+              {%- endcase -%}
+            {%- endunless -%}
+          {%- endfor -%}
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Impact text (FA)",
+  "class": "shopify-section--impact-text",
+  "tag": "section",
+  "disabled_on": {
+    "templates": ["password"],
+    "groups": ["header", "custom.overlay"]
+  },
+  "max_blocks": 3,
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Impact text",
+          "info": "For best results, keep this text short and impactful.",
+          "default": "100%"
+        },
+        {
+          "type": "select",
+          "id": "title_class",
+          "label": "Impact text style",
+          "options": [
+            {
+              "value": "h0",
+              "label": "H0"
+            },
+            {
+              "value": "h1",
+              "label": "H1"
+            },
+            {
+              "value": "h2",
+              "label": "H2"
+            },
+            {
+              "value": "h3",
+              "label": "H3"
+            },
+            {
+              "value": "h4",
+              "label": "H4"
+            },
+            {
+              "value": "h5",
+              "label": "H5"
+            }
+          ],
+          "default": "h1"
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "Showcase a benefit of your product"
+        },
+        {
+          "type": "select",
+          "id": "subheading_class",
+          "label": "Subheading style",
+          "options": [
+            {
+              "value": "h0",
+              "label": "H0"
+            },
+            {
+              "value": "h1",
+              "label": "H1"
+            },
+            {
+              "value": "h2",
+              "label": "H2"
+            },
+            {
+              "value": "h3",
+              "label": "H3"
+            },
+            {
+              "value": "h4",
+              "label": "H4"
+            },
+            {
+              "value": "h5",
+              "label": "H5"
+            },
+            {
+              "value": "text-eyebrow",
+              "label": "Eyebrow"
+            }
+          ],
+          "default": "h3"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Content"
+        },
+        {
+          "type": "select",
+          "id": "content_class",
+          "label": "Content style",
+          "options": [
+            {
+              "value": "text-lg",
+              "label": "Large"
+            },
+            {
+              "value": "text-base",
+              "label": "Default"
+            },
+            {
+              "value": "text-sm",
+              "label": "Small"
+            },
+            {
+              "value": "text-xs",
+              "label": "Extra Small"
+            }
+          ],
+          "default": "text-base"
+        },
+        {
+          "type": "header",
+          "content": "Button"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button text"
+        },
+        {
+          "type": "url",
+          "id": "button_url",
+          "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "button_size",
+          "label": "Button size",
+          "default": "base",
+          "options": [{
+            "label": "Small",
+            "value": "sm"
+          },{
+            "label": "Default",
+            "value": "base"
+          },{
+            "label": "Large",
+            "value": "lg"
+          },{
+            "label": "X-large",
+            "value": "xl"
+          }]
+        },
+        {
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "default": "fill",
+          "options": [{
+            "label":"Primary",
+            "value": "fill"
+          },{
+            "label":"Secondary",
+            "value":"secondary"
+          },{
+            "label":"Outline",
+            "value": "outline"
+          },{
+            "label":"Link",
+            "value": "link"
+          }]
+        },
+        {
+          "type": "header",
+          "content": "Number animation"
+        },
+        {
+          "type": "paragraph",
+          "content": "Only number can be animated. Dots, commas and spaces can be used as separators."
+        },
+        {
+          "type": "checkbox",
+          "id": "animate_impact_text",
+          "label": "Show count up animation",
+          "default": false
+        },
+        {
+          "type": "range",
+          "id": "animate_impact_text_duration",
+          "label": "Count up duration",
+          "min": 0.5,
+          "max": 5,
+          "step": 0.1,
+          "unit": "s",
+          "default": 2
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "background_sectioned_boxed",
+      "label": "Section Background",
+      "info": "This background color is only applied if FULL WIDTH is deselected."
+    },
+    {
+      "type": "text",
+      "id": "nav_anchor_label",
+      "label": "Nav anchor label",
+      "info": "Used to build dynamic nav, requires section nav anchor links"
+    },
+    {
+      "type": "checkbox",
+      "id": "stack_mobile",
+      "label": "Stack on mobile",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "start",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "end",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "impact_text_style",
+      "label": "Impact text style",
+      "options": [
+        {
+          "value": "outline",
+          "label": "Outline"
+        },
+        {
+          "value": "fill",
+          "label": "Fill"
+        }
+      ],
+      "default": "fill"
+    },
+    {
+      "type": "select",
+      "id": "text_divider",
+      "label": "Multiple texts divider",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "circle",
+          "label": "Circle"
+        },
+        {
+          "value": "diamond",
+          "label": "Diamond"
+        },
+        {
+          "value": "line",
+          "label": "Line"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "header",
+      "content": "Headline Text"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Text",
+      "default": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "title_class",
+      "label": "Style",
+      "options": [
+        {
+          "value": "h0",
+          "label": "H0"
+        },
+        {
+          "value": "h1",
+          "label": "H1"
+        },
+        {
+          "value": "h2",
+          "label": "H2"
+        },
+        {
+          "value": "h3",
+          "label": "H3"
+        },
+        {
+          "value": "h4",
+          "label": "H4"
+        },
+        {
+          "value": "h5",
+          "label": "H5"
+        },
+        {
+          "value": "text-eyebrow",
+          "label": "Eyebrow"
+        },
+        {
+          "value": "text-lg",
+          "label": "Large"
+        },
+        {
+          "value": "text-base",
+          "label": "Default"
+        },
+        {
+          "value": "text-sm",
+          "label": "Small"
+        },
+        {
+          "value": "text-xs",
+          "label": "Extra Small"
+        }
+      ],
+      "default": "h1"
+    },
+    {
+      "type": "header",
+      "content": "Background Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "range",
+      "default": 100,
+      "id": "image_opacity",
+      "label": "Image opacity",
+      "min": 1,
+      "max": 100,
+      "step": 1
+    },
+    {
+      "type": "select",
+      "id": "image_blend_mode",
+      "label": "Image blend mode",
+      "info": "Allow image to blend with background.",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal (Default)"
+        },
+        {
+          "value": "multiply",
+          "label": "Multiply"
+        },
+        {
+          "value": "screen",
+          "label": "Screen"
+        },
+        {
+          "value": "overlay",
+          "label": "Overlay"
+        },
+        {
+          "value": "darken",
+          "label": "Darken"
+        },
+        {
+          "value": "lighten",
+          "label": "LIghten"
+        }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "header",
+      "content": "Custom top and bottom padding"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_custom_padding",
+      "label": "Use custom padding",
+      "info": "Selecting this option will disable the global vertical space and auto collapse. Required if you use the custom padding options below."
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Top Padding",
+      "info": "Desktop",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Bottom Padding",
+      "info": "Desktop",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Top Padding",
+      "info": "Mobile & tablet",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Bottom Padding",
+      "info": "Mobile & tablet",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "header",
+      "content": "Colors",
+      "info": "Gradient replaces solid colors when set. Gradient text outline and gradient background cannot be combined."
+    },
+    {
+      "type": "color_scheme",
+      "id": "scheme",
+      "label": "Color Scheme"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "color",
+      "id": "heading_text_color",
+      "label": "Impact text"
+    },
+    {
+      "type": "color_background",
+      "id": "heading_gradient",
+      "label": "Impact text gradient"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Impact text (FA)",
+      "blocks": [
+        {
+          "type": "item"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

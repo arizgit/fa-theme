@@ -1,0 +1,375 @@
+{% liquid
+  # filter the active urgency message
+  assign count = 0
+  assign hide_id = ''
+  for block in section.blocks
+    case block.type
+      when 'message'
+        assign count = count | plus: 1
+    
+      when 'urgency'
+        assign start_date = block.settings.start_time | date: '%s'
+        assign end_date = block.settings.end_time | date: '%s'
+        assign current_date = 'now' | date: '%s'
+        if block.settings.hide_before_start and start_date > current_date
+          assign hide_id = hide_id | append: block.id | append: ','
+          continue
+        endif
+        if block.settings.hide_after_end and current_date > end_date
+          assign hide_id = hide_id | append: block.id | append: ','
+          continue
+        endif
+        assign count = count | plus: 1
+    endcase
+  endfor
+  assign hide_id = hide_id | remove_last: ',' | split: ','
+%}
+
+{%- if count > 0 -%}
+  {%- comment -%}
+  ------------------------------------------------------------------------------------------------------------------------
+  CSS
+  ------------------------------------------------------------------------------------------------------------------------
+  {%- endcomment -%}
+  <style>
+    :root {
+      --sticky-announcement-bar-enabled: {%- if section.settings.enable_sticky -%}1{% else %}0{% endif %};
+    }
+
+    {%- if section.settings.enable_sticky -%}
+      #shopify-section-{{ section.id }} {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+      }
+
+      .shopify-section--header ~ #shopify-section-{{ section.id }} {
+        top: calc(var(--sticky-header-enabled, 0) * var(--header-height, 0px));
+      }
+    {%- endif -%}
+  </style>
+
+  {%- comment -%}
+  ------------------------------------------------------------------------------------------------------------------------
+  LIQUID
+  ------------------------------------------------------------------------------------------------------------------------
+  {%- endcomment -%}
+{% if section.settings.announcement_link != blank %}
+<style>
+.shopify-section--announcement-bar {
+  position: relative;
+}
+</style>
+<a class="overlay_link-custom" href="{{ section.settings.announcement_link }}"></a>
+{% endif %}
+  <height-observer variable="announcement-bar">
+    <div {% render 'surface', class: 'announcement-bar', background_gradient: section.settings.background_gradient, background: section.settings.background, text_color: section.settings.text_color %}>
+      {%- if section.settings.navigation_mode == 'scrolling' -%}
+        <marquee-text scrolling-speed="{{ section.settings.scrolling_speed }}" class="announcement-bar__scrolling-list">
+          {%- capture content -%}
+            {%- for block in section.blocks -%}
+              {% case block.type %}
+                {% when 'message' %}
+                  {% assign text = block.settings.text %}
+                {% when 'urgency' %}
+                  {% if hide_id contains block.id %}
+                    {% continue %}
+                  {% endif %}
+                  {% capture text %}
+                    {% render 'fa-urgency-text', settings: block.settings %}
+                  {% endcapture %}
+              {% endcase %}
+
+              <p class="bold {{ section.settings.text_size }}" {{ block.shopify_attributes }}>
+                {%- if block.settings.url != blank -%}
+                  <a href="{{ block.settings.url }}">{{ text }}</a>
+                {%- else -%}
+                  {{ text }}
+                {%- endif -%}
+              </p>
+
+              <span class="shape-circle shape--sm"></span>
+            {%- endfor -%}
+          {%- endcapture -%}
+
+          {%- for i in (1..10) -%}
+            <span class="announcement-bar__item" {% unless forloop.first %}aria-hidden="true"{% endunless %}>
+              {{- content -}}
+            </span>
+          {%- endfor -%}
+        </marquee-text>
+      {%- else -%}
+        <div class="container">
+          <div class="announcement-bar__wrapper {% if count == 1 %}justify-center{% else %}justify-between{% endif %}">
+            {%- if count > 1 -%}
+              <button class="tap-area" is="prev-button" aria-controls="announcement-bar" aria-label="{{ 'general.accessibility.previous' | t }}">
+                {%- render 'icon' with 'chevron-left', direction_aware: true -%}
+              </button>
+            {%- endif -%}
+
+            <announcement-bar swipeable id="announcement-bar" class="announcement-bar__static-list">
+              {%- for block in section.blocks -%}
+                {% case block.type %}
+                {% when 'message' %}
+                  {% assign text = block.settings.text %}
+                {% when 'urgency' %}
+                  {% if hide_id contains block.id %}
+                    {% continue %}
+                  {% endif %}
+                  {% capture text %}
+                    {% render 'fa-urgency-text', settings: block.settings %}
+                  {% endcapture %}
+                {% endcase %}
+                <p class="bold {{ section.settings.text_size }} {% unless forloop.first %}reveal-invisible{% endunless %}" {{ block.shopify_attributes }}>
+                  {%- if block.settings.url != blank -%}
+                    <a href="{{ block.settings.url }}">{{ text }}</a>
+                  {%- else -%}
+                    {{ text }}
+                  {%- endif -%}
+                </p>
+              {%- endfor -%}
+            </announcement-bar>
+
+            {%- if count > 1 -%}
+              <button class="tap-area" is="next-button" aria-controls="announcement-bar" aria-label="{{ 'general.accessibility.next' | t }}">
+                {%- render 'icon' with 'chevron-right', direction_aware: true -%}
+              </button>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+  </height-observer>
+
+  <script>
+    document.documentElement.style.setProperty('--announcement-bar-height', Math.round(document.getElementById('shopify-section-{{ section.id }}').clientHeight) + 'px');
+  </script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Announcement bar",
+  "class": "shopify-section--announcement-bar",
+  "tag": "aside",
+  "max_blocks": 5,
+  "blocks": [
+    {
+      "type": "message",
+      "name": "Message",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Announce something here"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Link"
+        }
+      ]
+    },
+    {
+      "type": "urgency",
+      "name": "Urgency message",
+      "settings": [
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Link"
+        },
+        {
+          "type": "text",
+          "id": "start_time",
+          "label": "Start date and time",
+          "info": "Format: dd/mm/yyyy hh:mm:ss",
+          "placeholder": "dd/mm/yyyy hh:mm:ss"
+        },
+        {
+          "type": "text",
+          "id": "end_time",
+          "label": "End date and time",
+          "info": "Format: dd/mm/yyyy hh:mm:ss",
+          "placeholder": "dd/mm/yyyy hh:mm:ss"
+        },
+        {
+          "type": "number",
+          "id": "start_value",
+          "label": "Start value",
+          "default": 0
+        },
+        {
+          "type": "number",
+          "id": "end_value",
+          "label": "End value",
+          "default": 0
+        },
+        {
+          "type": "select",
+          "id": "value_increment",
+          "label": "Value increment",
+          "options": [
+            {
+              "value": "day",
+              "label": "Daily"
+            },
+            {
+              "value": "hour",
+              "label": "Hourly"
+            }
+          ]
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_before_start",
+          "label": "Hide before start date/time",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_after_end",
+          "label": "Hide after end date/time",
+          "default": false
+        },
+        {
+          "type": "paragraph",
+          "content": "The textareas have placeholders you can use that will be swapped with the value. Here are your options:"
+        },
+        {
+          "type": "paragraph",
+          "content": "[start_days] amount of days from now until the start date."
+        },
+        {
+          "type": "paragraph",
+          "content": "[start_hours] amount of hours from now until the start date."
+        },
+        {
+          "type": "paragraph",
+          "content": "[end_days] amount of days from now until the end date."
+        },
+        {
+          "type": "paragraph",
+          "content": "[end_hours] amount of hours from now until the end date."
+        },
+        {
+          "type": "paragraph",
+          "content": "[display] the current increment integer (ex: 1)"
+        },
+        {
+          "type": "paragraph",
+          "content": "[display_fraction] the current increment as a fraction one decimal place (ex: 1.2)"
+        },
+        {
+          "type": "paragraph",
+          "content": "[display_fraction_2] the current increment as a fraction two decimal place (ex: 1.23)"
+        },
+        {
+          "type": "textarea",
+          "id": "start_message",
+          "label": "Before start message",
+          "info": "If not hidden before start, this message will be shown",
+          "default": "Sale starts in [start_hours]"
+        },
+        {
+          "type": "textarea",
+          "id": "active_message",
+          "label": "Active message",
+          "info": "Shown when current date/time is between start and stop date/time",
+          "default": "Sale ends in [end_hours]"
+        },
+        {
+          "type": "textarea",
+          "id": "end_message",
+          "label": "After end message",
+          "info": "If not hidden after end, this message will be shown",
+          "default": "Sale is over"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_sticky",
+      "label": "Enable sticky bar",
+      "default": false
+    },
+    {
+      "type": "url",
+      "id": "announcement_link",
+      "label": "Link for whole bar",
+      "info": "Add link here to make bar clickable"
+    },
+    {
+      "type": "select",
+      "id": "text_size",
+      "label": "Text size",
+      "options": [
+        {
+          "value": "text-xxs",
+          "label": "X-Small"
+        },
+        {
+          "value": "text-xs",
+          "label": "Small"
+        },
+        {
+          "value": "text-base",
+          "label": "Medium"
+        },
+        {
+          "value": "text-lg",
+          "label": "Large"
+        }
+      ],
+      "default": "text-xs"
+    },
+    {
+      "type": "select",
+      "id": "navigation_mode",
+      "label": "Multiple message navigation",
+      "options": [
+        {
+          "value": "arrows",
+          "label": "Arrows"
+        },
+        {
+          "value": "scrolling",
+          "label": "Auto-scrolling"
+        }
+      ],
+      "default": "arrows"
+    },
+    {
+      "type": "range",
+      "id": "scrolling_speed",
+      "label": "Scrolling speed",
+      "min": 10,
+      "max": 30,
+      "unit": "s",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Colors",
+      "info": "Gradient replaces solid colors when set."
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text"
+    }
+  ]
+}
+{% endschema %}

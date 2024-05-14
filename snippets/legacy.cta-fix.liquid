@@ -1,0 +1,25 @@
+<script src="{{ 'legacy.product-form.js' | asset_url }}" defer="defer"></script>
+
+<product-form id="custom-add-to-cart">
+  <form>
+    <input name="id" type="hidden" value="{{ product.first_available_variant.id }}">
+    <button type="submit" name="add" class="product-form__submit button button--full-width button--secondary" aria-haspopup="dialog">
+      <span>Add to cart</span>
+      <div class="loading-overlay__spinner hidden">
+        <svg aria-hidden="true" focusable="false" role="presentation" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+          <circle class="path" fill="none" stroke-width="6" cx="33" cy="33" r="30"></circle>
+        </svg>
+      </div>
+  </button>
+  </form>
+</product-form>
+
+<script>
+  document.addEventListener('DOMContentLoaded', (e) => {
+    const target = document.querySelector('.gf_add-to-cart[type="submit"]').parentElement;
+    const productForm = document.querySelector('#custom-add-to-cart');
+    target.appendChild(productForm);
+    
+    target.firstChild.style.display = 'none';
+  });
+</script>

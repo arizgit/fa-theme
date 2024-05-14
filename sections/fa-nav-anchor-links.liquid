@@ -1,0 +1,208 @@
+<style>
+  #shopify-section-{{ section.id }} {
+    {%- if section.settings.enable_sticky and request.design_mode == false -%}
+    position: sticky;
+    top: -1px;
+    z-index: 5;
+    {%- if section.settings.enable_scroll -%}
+    height: 0;
+    opacity: 0;
+    {%- endif -%}
+    {%- endif -%}
+  }
+</style>
+{%- if section.settings.show_cart_button == false and section.settings.show_product_title == false -%}
+  {%- assign center_nav = 'justify-center' -%}
+{%- endif -%}
+{%- unless product -%}
+  {%- assign center_nav = 'justify-center' -%}
+{%- endunless -%}
+<div class="section {{ section.settings.scheme }} bg-custom nav-anchor-links">
+  <nav-anchor-links class="nav-anchor-links__wrapper"
+    data-scroll="{{ section.settings.enable_scroll }}"
+    data-builder="{{ section.settings.use_nav_builder }}"
+    data-sticky="{{ section.settings.enable_sticky }}"
+    data-product-variant="{{ product.first_available_variant.id }}">
+    
+    {%- if product and section.settings.show_product_title -%}
+      <div class="nav-anchor-links__title title-fa">
+        <h3><a href="#top">{{ product.title }}</a></h3>
+      </div>
+    {%- endif -%}
+
+    <nav class="nav-anchor-links__link-list wrap {{ center_nav }}">
+      <ul class="contents md-max:hidden" role="list">
+        {% for block in section.blocks %}
+          {% case block.type %}
+            {% when 'link' %}
+            <li>
+              <a href="#{{ block.settings.anchor | handleize }}" title="goto {{ block.settings.label | downcase }}" class="text-nav-link link-faded-reverse">{{- block.settings.label -}}</a>
+            </li>
+          {% endcase %}
+        {% endfor %}
+      </ul>
+      {% capture options %}
+        {% for block in section.blocks %}
+          {% case block.type %}
+            {% when 'link' %}
+            <option value="#{{ block.settings.anchor | handleize }}">{{- block.settings.label -}}</option>
+          {% endcase %}
+        {% endfor %}
+      {% endcapture %}
+      <div class="md:hidden">
+        {% render 'select', options: options, label: 'Jump to' %}
+      </div>
+    </nav>
+
+    {%- if product and section.settings.show_cart_button -%}
+      {%- capture product_form_id -%}product-form-{{ product.id }}{%- endcapture -%}
+      {%- if product.selected_or_first_available_variant.available -%}
+        {%- if product.template_suffix contains 'pre-order' -%}
+          {%- capture button_content -%}{{ 'product.general.pre_order_button' | t }}{%- endcapture -%}
+        {%- else -%}
+          {%- capture button_content -%}{{ 'product.general.add_to_cart_button' | t }}{%- endcapture -%}
+        {%- endif -%}
+      {%- else -%}
+        {%- capture button_content -%}{{ 'product.general.sold_out_button' | t }}{%- endcapture -%}
+        {%- assign button_disabled = true -%}
+      {%- endif -%}
+      {%- assign btn_is_secondary = false -%}
+      {%- assign btn_style = 'fill' -%}
+      {%- case section.settings.cart_button_style -%}
+        {%- when 'secondary' -%}
+          {%- assign btn_is_secondary = true -%}
+        {%- when 'outline' -%}
+          {%- assign btn_style = 'outline' -%}
+      {%- endcase -%}
+      <div class="nav-anchor-links__cart-button">
+        <buy-buttons template="{{ product.template_suffix }}" form="{{ product_form_id }}">
+          {%- render 'button',
+            content: button_content,
+            type: 'submit',
+            size: 'sm',
+            disabled: button_disabled,
+            form: product_form_id,
+            secondary: btn_is_secondary,
+            style: btn_style,
+            subdued: button_disabled,
+          -%}
+        </buy-buttons>
+      </div>
+    {%- endif -%}
+  </nav-anchor-links>
+</div>
+
+{% schema %}
+{
+  "name": "Nav anchor links (FA)",
+  "class": "shopify-section--nav-anchor-links",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "label": "Enable sticky nav",
+      "default": false,
+      "id": "enable_sticky"
+    },
+    {
+      "type": "checkbox",
+      "label": "Show on scroll",
+      "info": "Requires enable sticky nav",
+      "default": false,
+      "id": "enable_scroll"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_nav_builder",
+      "label": "Build dynamic nav",
+      "info": "Link list will be built from sections avalible on the page. If enabled, will be appended to blocks",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Product template options"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_title",
+      "default": false,
+      "label": "Show product title",
+      "info": "On product template only!"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_cart_button",
+      "default": false,
+      "label": "Show cart button",
+      "info": "On product template only!"
+    },
+    {
+      "type": "select",
+      "id": "cart_button_style",
+      "label": "Cart button style",
+      "default": "fill",
+      "options": [
+        {
+          "label":"Primary",
+          "value": "fill"
+        },{
+          "label":"Secondary",
+          "value":"secondary"
+        },{
+          "label":"Outline",
+          "value": "outline"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color_scheme",
+      "id": "scheme",
+      "label": "Color Scheme"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "link",
+      "name": "Page link",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label"
+        },
+        {
+          "type": "text",
+          "id": "anchor",
+          "label": "Anchor id",
+          "info": "The id of a section on the page."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Nav anchor links (FA)",
+      "blocks": [
+        {
+          "type": "link",
+          "settings": {
+            "label": "Link One",
+            "anchor": "link-one"
+          }
+        },
+        {
+          "type": "link",
+          "settings": {
+            "label": "Link One",
+            "anchor": "link-one"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,545 @@
+{%- render 'section-spacing-collapsing' -%}
+
+<style>
+  #shopify-section-{{ section.id }} {
+    --product-grid: auto / minmax(0, 1fr);
+    --product-gallery-media-list-grid: auto / auto-flow {% if section.settings.mobile_carousel_control == 'free_scroll' %}{% if section.settings.mobile_media_size == 'expanded' %}84vw{% else %}73vw{% endif %}{% else %}100%{% endif %};
+    --product-gallery-media-list-gap: {% if section.settings.mobile_media_size == 'expanded' %}var(--spacing-0-5){% else %}var(--grid-gutter){% endif %};
+    padding-top: {{ section.settings.padding_top }}rem;
+    padding-bottom: {{ section.settings.padding_bottom }}rem;
+  }
+
+  @media screen and (max-width: 999px) {
+    #shopify-section-{{ section.id }} {
+      --section-spacing-block-start: {% if section.settings.mobile_media_size == 'expanded' %}0px{% else %}var(--container-gutter){% endif %};
+    }
+  }
+
+  @media screen and (min-width: 1000px) {
+    #shopify-section-{{ section.id }} {
+      {%- assign media_ratio = section.settings.desktop_media_width | divided_by: 50.0 -%}
+      --product-grid: auto / minmax(0, {{ media_ratio }}fr) minmax(0, {{ 2.0 | minus: media_ratio }}fr);
+      --product-gallery-media-list-grid: {% if section.settings.desktop_media_layout contains 'grid' %}auto-flow dense / repeat(2, minmax(0, 1fr)){% else %}auto / auto-flow 100%{% endif %};
+      --product-gallery-media-list-gap: calc(var(--grid-gutter) / 2);
+    }
+
+    {%- if section.settings.desktop_media_layout == 'grid_highlight' -%}
+      #shopify-section-{{ section.id }} .product-gallery__media-list > :not([hidden]) {
+        grid-column: span 2;
+      }
+
+      #shopify-section-{{ section.id }} .product-gallery__media-list > :not([hidden]) ~ *:not(.product-gallery__media--expand) {
+        grid-column: span 1;
+      }
+    {%- endif -%}
+  }
+
+  .shopify-section--plan-explain {
+    background-color: {{ section.settings.background_color }} !important;
+    background-image: {{ section.settings.background_gradient }};
+    color: {{ section.settings.text_color }};
+  }
+
+  @media screen and (min-width: 1400px) {
+    #shopify-section-{{ section.id }} {
+      --product-gallery-media-list-gap: var(--grid-gutter);
+    }
+  }
+
+  #shopify-section-{{ section.id }} {
+    display: flex;
+    justify-content: center;
+  }
+
+  .plan-explain-section {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    width: 90%;
+    max-width: 1200px;
+    padding: 50px 0;
+  }
+
+  .plan-explain-outline {
+    display: flex;
+    flex-flow: column;
+    align-items: start;
+    justify-content: space-between;
+    width: 420px;
+  }
+
+  .plan-explain-outline-header {
+    display: flex;
+    align-items: center;
+  }
+
+  .plan-explain-outline-header p {
+    color: #C2D3DE;
+    font-size: 16px;
+  }
+
+  .plan-explain-outline h2 {
+    font-size: 42px;
+    font-weight: 500;
+    padding-bottom: 20px;
+    line-height: 1.2;
+  }
+
+  .plan-block {
+    font-size: 16px;
+    width: 300px;
+    height: 450px;
+    border-radius: 6px;
+    padding: 30px;
+    display: flex;
+    flex-flow: column;
+    justify-content: space-between;
+    align-items: start;
+  }
+
+  .plan-check-items {
+    font-size: 18px !important;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .plan-check-item {
+    display: flex;
+    padding: 3px 0;
+    width: 100%
+  }
+
+  .check-item-icon {
+    margin-right: 5px;
+  }
+
+  @media (max-width: 1080px) {
+    .plan-block {
+      font-size: 12px;
+      width: 200px;
+      height: 400px;
+    }
+    .plan-check-items {
+      font-size: 14px !important;
+    }
+    .plan-check-item svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    #shopify-section-{{ section.id }} {
+      padding-top: {{ section.settings.padding_top_mobile }}rem;
+      padding-bottom: {{ section.settings.padding_bottom_mobile }}rem;
+    }
+
+    .plan-explain-section {
+      flex-direction: column;
+      justify-content: center;
+      width: 80%;
+    }
+
+    .plan-explain-outline {
+      margin-bottom: 20px;
+      text-align: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    .plan-explain-outline h2 {
+      font-size: 32px;
+    }
+
+    .plan-details-container {
+      overflow: auto;
+      padding-bottom: 20px;
+    }
+
+    .plan-details {
+      width: 140%;
+    }
+
+    .plan-block {
+      font-size: 12px;
+      width: 70%;
+      height: 350px;
+      padding: 30px;
+    }
+
+    .plan-check-items {
+      font-size: 12px !important;
+    }
+
+    .plan-check-item svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+</style>
+
+<div class="plan-explain-section">
+  <div class="plan-explain-outline">
+    <div class="plan-explain-outline-header">
+      <img src="{{ section.settings.icon_image | image_url }}" width = 45 height = 50 style="margin-right: 20px;"  />
+      <p>{{ section.settings.subtitle }}</p>
+    </div>
+    <h2>{{ section.settings.title }}</h2>
+    <p style="font-weight: 300;">{{ section.settings.description }}</p>
+  </div>
+  <div class="plan-details-container">
+    <div class="plan-details" style="display: flex;">
+      {%- if section.blocks.size > 0 -%}
+          {%- for block in section.blocks -%}
+            <div class="plan-block" style="background-color: {{ block.settings.background }};">
+              <p style="color: {{ block.settings.title_color }};">{{ block.settings.title }}</p>
+              <div class="plan-check-items">
+                {%- if block.settings.list_1_check -%}
+                  <div class="plan-check-item" style="color: {{ block.settings.item_color }};">
+                    <span class="check-item-icon">{% render 'icon', icon: 'check' %}</span>
+                    <p>{{ block.settings.list_1_text }}</p>
+                  </div>
+                {%- else -%}
+                  <div class="plan-check-item" style="color: {{ block.settings.item_color }};">
+                    <span class="check-item-icon" style="color: transparent;">{% render 'icon', icon: 'check' %}</span>
+                    <p style="text-decoration: line-through">{{ block.settings.list_1_text }}</p>
+                  </div>
+                {%- endif -%}
+                {%- if block.settings.list_2_check -%}
+                  <div class="plan-check-item" style="color: {{ block.settings.item_color }};">
+                    <span class="check-item-icon">{% render 'icon', icon: 'check' %}</span>
+                    <p>{{ block.settings.list_2_text }}</p>
+                  </div>
+                {%- else -%}
+                  <div class="plan-check-item" style="color: {{ block.settings.item_color }};">
+                    <span class="check-item-icon" style="color: transparent;">{% render 'icon', icon: 'check' %}</span>
+                    <p style="text-decoration: line-through">{{ block.settings.list_2_text }}</p>
+                  </div>
+                {%- endif -%}
+                {%- if block.settings.list_3_check -%}
+                  <div class="plan-check-item" style="color: {{ block.settings.item_color }};">
+                    <span class="check-item-icon">{% render 'icon', icon: 'check' %}</span>
+                    <p>{{ block.settings.list_3_text }}</p>
+                  </div>
+                {%- else -%}
+                  <div class="plan-check-item" style="color: {{ block.settings.item_color }};">
+                    <span class="check-item-icon" style="color: transparent;">{% render 'icon', icon: 'check' %}</span>
+                    <p style="text-decoration: line-through">{{ block.settings.list_3_text }}</p>
+                  </div>
+                {%- endif -%}
+                {%- if block.settings.list_4_check -%}
+                  <div class="plan-check-item" style="color: {{ block.settings.item_color }};">
+                    <span class="check-item-icon">{% render 'icon', icon: 'check' %}</span>
+                    <p>{{ block.settings.list_4_text }}</p>
+                  </div>
+                {%- else -%}
+                  <div class="plan-check-item" style="color: {{ block.settings.item_color }};">
+                    <span class="check-item-icon" style="color: transparent;">{% render 'icon', icon: 'check' %}</span>
+                    <p style="text-decoration: line-through">{{ block.settings.list_4_text }}</p>
+                  </div>
+                {%- endif -%}
+                {%- if block.settings.list_5_check -%}
+                  <div class="plan-check-item" style="color: {{ block.settings.item_color }};">
+                    <span class="check-item-icon">{% render 'icon', icon: 'check' %}</span>
+                    <p>{{ block.settings.list_5_text }}</p>
+                  </div>
+                {%- else -%}
+                  <div class="plan-check-item" style="color: {{ block.settings.item_color }};">
+                    <span class="check-item-icon" style="color: transparent;">{% render 'icon', icon: 'check' %}</span>
+                    <p style="text-decoration: line-through">{{ block.settings.list_5_text }}</p>
+                  </div>
+                {%- endif -%}
+                {%- if block.settings.list_6_check -%}
+                  <div class="plan-check-item" style="color: {{ block.settings.item_color }};">
+                    <span class="check-item-icon">{% render 'icon', icon: 'check' %}</span>
+                    <p>{{ block.settings.list_6_text }}</p>
+                  </div>
+                {%- else -%}
+                  <div class="plan-check-item" style="color: {{ block.settings.item_color }};">
+                    <span class="check-item-icon" style="color: transparent;">{% render 'icon', icon: 'check' %}</span>
+                    <p style="text-decoration: line-through">{{ block.settings.list_6_text }}</p>
+                  </div>
+                {%- endif -%}
+                {%- if block.settings.list_7_check -%}
+                  <div class="plan-check-item" style="color: {{ block.settings.item_color }};">
+                    <span class="check-item-icon">{% render 'icon', icon: 'check' %}</span>
+                    <p>{{ block.settings.list_7_text }}</p>
+                  </div>
+                {%- else -%}
+                  <div class="plan-check-item" style="color: {{ block.settings.item_color }};">
+                    <span class="check-item-icon" style="color: transparent;">{% render 'icon', icon: 'check' %}</span>
+                    <p style="text-decoration: line-through">{{ block.settings.list_7_text }}</p>
+                  </div>
+                {%- endif -%}
+                {%- if block.settings.list_8_check -%}
+                  <div class="plan-check-item" style="color: {{ block.settings.item_color }};">
+                    <span class="check-item-icon">{% render 'icon', icon: 'check' %}</span>
+                    <p>{{ block.settings.list_8_text }}</p>
+                  </div>
+                {%- else -%}
+                  <div class="plan-check-item" style="color: {{ block.settings.item_color }};">
+                    <span class="check-item-icon" style="color: transparent;">{% render 'icon', icon: 'check' %}</span>
+                    <p style="text-decoration: line-through">{{ block.settings.list_8_text }}</p>
+                  </div>
+                {%- endif -%}
+              </div>
+            </div>
+          {%- endfor  -%}
+      {%- endif  -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Plan Comparison(FA)",
+  "class": "shopify-section--plan-explain",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "SubTitle",
+      "default": "8 MACHINE IN 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "icon_image",
+      "label": "Icon Image"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Turn your 6-in-1 Nordic Hyper into an 8-in-1 machine"
+    },
+    {
+      "type": "text",
+      "id": "description",
+      "label": "description",
+      "default": "Upgrade your Nordic Hyper into a full body workout where you can now truly target your lower body. Unlock key lower body movements such as Leg Extensions & Hamstring Curls for an effective full body workout."
+    },
+    {
+      "type": "header",
+      "content": "Custom top and bottom padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Top Padding",
+      "info": "Desktop",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Bottom Padding",
+      "info": "Desktop",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Top Padding",
+      "info": "Mobile & tablet",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "default": 1,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Bottom Padding",
+      "info": "Mobile & tablet",
+      "min": 0,
+      "max": 16
+    },
+    {
+      "type": "header",
+      "content": "Colors",
+      "info": "Gradient replaces solid colors when set."
+    },
+    {
+      "type": "color_scheme",
+      "id": "scheme",
+      "label": "Color Scheme"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text"
+    },
+    {
+      "type": "header",
+      "content": "Input colors",
+      "info": "Applies to elements like quantity selector and variant selectors."
+    },
+    {
+      "type": "color",
+      "id": "input_background",
+      "label": "Background",
+      "default": "rgba(0,0,0,0)"
+    },
+    {
+      "type": "color",
+      "id": "input_text_color",
+      "label": "Text"
+    }
+  ],
+  "blocks":[
+    {
+      "type": "plan",
+      "name": "plans",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "WITH LEG DEVELOPER ATTACHMENT"
+        },
+        {
+          "type": "text",
+          "id": "list_1_text",
+          "label": "list1 Text",
+          "default": "Nordic Curls"
+        },
+        {
+          "type": "checkbox",
+          "id": "list_1_check",
+          "label": "list 1",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "list_2_text",
+          "label": "list2 Text",
+          "default": "45° Back Extension"
+        },
+        {
+          "type": "checkbox",
+          "id": "list_2_check",
+          "label": "list 2",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "list_3_text",
+          "label": "list3 Text",
+          "default": "GHD"
+        },
+        {
+          "type": "checkbox",
+          "id": "list_3_check",
+          "label": "list 3",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "list_4_text",
+          "label": "list4 Text",
+          "default": "Reverse Hyper"
+        },
+        {
+          "type": "checkbox",
+          "id": "list_4_check",
+          "label": "list 4",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "list_5_text",
+          "label": "list5 Text",
+          "default": "Sit-Up Bench"
+        },
+        {
+          "type": "checkbox",
+          "id": "list_5_check",
+          "label": "list 5",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "list_6_text",
+          "label": "list6 Text",
+          "default": "Hip Thrust"
+        },
+        {
+          "type": "checkbox",
+          "id": "list_6_check",
+          "label": "list 6",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "list_7_text",
+          "label": "list7 Text",
+          "default": "Leg Extension"
+        },
+        {
+          "type": "checkbox",
+          "id": "list_7_check",
+          "label": "list 7",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "list_8_text",
+          "label": "list8 Text",
+          "default": "Hamstring Curl"
+        },
+        {
+          "type": "checkbox",
+          "id": "list_8_check",
+          "label": "list 8",
+          "default": true
+        },
+        {
+          "type": "color",
+          "id": "background",
+          "label": "Background"
+        },
+        {
+          "type": "color",
+          "id": "title_color",
+          "label": "Title Color"
+        },
+        {
+          "type": "color",
+          "id": "item_color",
+          "label": "Item Color"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Plan Comparison(FA)"
+    }
+  ]
+}
+{% endschema %}

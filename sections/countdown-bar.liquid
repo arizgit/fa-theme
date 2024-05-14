@@ -1,0 +1,723 @@
+{{- 'countdown-bar.css' | asset_url | stylesheet_tag: preload: true -}}
+{% liquid
+  # filter the active urgency message
+  assign count = 0
+  assign hide_id = ''
+  for block in section.blocks
+    case block.type
+      when 'message'
+        assign count = count | plus: 1
+
+      when 'countdown_message'
+        assign count = count | plus: 1
+    
+      when 'urgency'
+        assign start_date = block.settings.start_time | date: '%s'
+        assign end_date = block.settings.end_time | date: '%s'
+        assign current_date = 'now' | date: '%s'
+        if block.settings.hide_before_start and start_date > current_date
+          assign hide_id = hide_id | append: block.id | append: ','
+          continue
+        endif
+        if block.settings.hide_after_end and current_date > end_date
+          assign hide_id = hide_id | append: block.id | append: ','
+          continue
+        endif
+        assign count = count | plus: 1
+    endcase
+  endfor
+  assign hide_id = hide_id | remove_last: ',' | split: ','
+%}
+
+{%- if count > 0 -%}
+  {%- comment -%}
+  ------------------------------------------------------------------------------------------------------------------------
+  CSS
+  ------------------------------------------------------------------------------------------------------------------------
+  {%- endcomment -%}
+  <style>
+    :root {
+      --sticky-announcement-bar-enabled: {%- if section.settings.enable_sticky -%}1{% else %}0{% endif %};
+    }
+
+    {%- if section.settings.enable_sticky -%}
+      #shopify-section-{{ section.id }} {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+      }
+
+      .shopify-section--header ~ #shopify-section-{{ section.id }} {
+        top: calc(var(--sticky-header-enabled, 0) * var(--header-height, 0px));
+      }
+    {%- endif -%}
+  </style>
+
+  {%- comment -%}
+  ------------------------------------------------------------------------------------------------------------------------
+  LIQUID
+  ------------------------------------------------------------------------------------------------------------------------
+  {%- endcomment -%}
+{% if section.settings.announcement_link != blank %}
+<style>
+.shopify-section.shopify-section-group-header-group.shopify-section--countdown-bar {
+    position: relative;
+}
+.countdown_close {
+  z-index: 999;
+}
+</style>
+<a class="overlay_link-custom" href="{{ section.settings.announcement_link }}"></a>
+{% endif %}
+  <height-observer variable="announcement-bar">
+    <div {% render 'surface', class: 'announcement-bar d_none', background_gradient: section.settings.background_gradient, background: section.settings.background, text_color: section.settings.text_color %}>
+<script>
+function setCookie(name, value, days) {
+    var expires = "";
+    if (days) {
+      var date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+  }
+
+  // Function to get a cookie
+  function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) === ' ') {
+        c = c.substring(1, c.length);
+      }
+      if (c.indexOf(nameEQ) === 0) {
+        return c.substring(nameEQ.length, c.length);
+      }
+    }
+    return null;
+  }
+  var isHidden = getCookie("announcementHidden");  
+  if (!isHidden) {
+    document.querySelector(".announcement-bar").classList.remove("d_none") // Show the announcement bar
+  }
+</script>
+      {%- if section.settings.navigation_mode == 'scrolling' -%}
+        <marquee-text scrolling-speed="{{ section.settings.scrolling_speed }}" class="announcement-bar__scrolling-list">
+          {%- capture content -%}
+            {%- for block in section.blocks -%}
+              {% case block.type %}
+                {% when 'message' %}
+                  {% assign text = block.settings.text %}
+                {% when 'urgency' %}
+                  {% if hide_id contains block.id %}
+                    {% continue %}
+                  {% endif %}
+                  {% capture text %}
+                    {% render 'fa-urgency-text', settings: block.settings %}
+                  {% endcapture %}
+              {% endcase %}
+
+              <p class="bold {{ section.settings.text_size }}" {{ block.shopify_attributes }}>
+                {%- if block.settings.url != blank -%}
+                  <a href="{{ block.settings.url }}">{{ text }}</a>
+                {%- else -%}
+                  {{ text }}
+                {%- endif -%}
+              </p>
+
+              <span class="shape-circle shape--sm"></span>
+            {%- endfor -%}
+          {%- endcapture -%}
+
+          {%- for i in (1..10) -%}
+            <span class="announcement-bar__item" {% unless forloop.first %}aria-hidden="true"{% endunless %}>
+              {{- content -}}
+            </span>
+          {%- endfor -%}
+        </marquee-text>
+      {%- else -%}
+        <div class="container">
+          <div class="announcement-bar__wrapper {% if count == 1 %}justify-center{% else %}justify-between{% endif %}">
+            {%- if count > 1 -%}
+              <button class="tap-area" is="prev-button" aria-controls="announcement-bar" aria-label="{{ 'general.accessibility.previous' | t }}">
+                {%- render 'icon' with 'chevron-left', direction_aware: true -%}
+              </button>
+            {%- endif -%}
+
+            <announcement-bar swipeable id="announcement-bar" class="announcement-bar__static-list">
+              {%- for block in section.blocks -%}
+                {% case block.type %}
+                {% when 'message' %}
+                  {% assign text = block.settings.text %}
+                {% when 'urgency' %}
+                  {% if hide_id contains block.id %}
+                    {% continue %}
+                  {% endif %}
+                  {% capture text %}
+                    {% render 'fa-urgency-text', settings: block.settings %}
+                  {% endcapture %}
+                {% when 'countdown_message' %}
+                  <div class="countdown_message_container">
+                    <div class="countdown_message">
+                      {% if block.settings.show_message == true %}
+                      <div class="countdown_message_text">
+                        {{ block.settings.message_text }}
+                      </div>
+                      {% endif %}
+                      {% if block.settings.show_timer == true %}
+                      <div class="countdown_message_timer">
+                        <div class="countdown_message_timer_value">
+                          <p class="countdown_message_timer_day countdown_message_timer_value_el">00</p>
+                          <p class="countdown_message_timer_value_text">DAYS</p>
+                        </div>
+                        <div class="countdown_message_timer_value">
+                          <p class="countdown_message_timer_hr countdown_message_timer_value_el">00</p>
+                          <p class="countdown_message_timer_value_text">HRS</p>
+                        </div>
+                        <div class="countdown_message_timer_value">
+                          <p class="countdown_message_timer_min countdown_message_timer_value_el">00</p>
+                          <p class="countdown_message_timer_value_text">MIN</p>
+                        </div>
+                        <div class="countdown_message_timer_value">
+                          <p class="countdown_message_timer_sec countdown_message_timer_value_el">00</p>
+                          <p class="countdown_message_timer_value_text">SEC</p>
+                        </div>
+                      </div>
+ <script type="text/javascript">
+    function countdownTimerBar() {
+// initial variables
+let second = 1000;
+let minute = second * 60;
+let hour = minute * 60;
+let day = hour * 24;
+
+// variables for settings
+let startNumber = Number({{ block.settings.start_number }});
+let endNumber = Number({{ block.settings.end_number }});
+let totalIncrements = Math.floor((endNumber - startNumber) / 0.1);
+
+
+let now = new Date().toLocaleString('en-US', { timeZone: '{{ block.settings.timezone }}' });
+
+let startTime = new Date('{{- block.settings.count_date | date: "%b %d, %Y" -}}').getTime();
+let endDateTime = new Date('{{- block.settings.count_date_picker  | date: "%b %d, %Y" -}}').getTime();
+
+// Check if end date is greater than current time
+if (endDateTime > new Date(now).getTime()) {
+    let x = setInterval(function () {
+        let now = new Date().toLocaleString('en-US', { timeZone: '{{ block.settings.timezone }}' });
+        let nowTime = new Date(now).getTime();
+        let distance = endDateTime - nowTime;
+
+        let distanceNew = nowTime - startTime;
+
+        let remainingMinutes = Math.floor(distanceNew / (1000 * 60));
+
+      {% if block.settings.show_percentage == true %}
+
+        var totalDuration = endDateTime - startTime;
+        var elapsedTime = nowTime - startTime;
+        var percentagePassed = (elapsedTime / totalDuration) * 100;
+        var difference = endNumber - startNumber;
+
+        let progressValue = Number(Number(remainingMinutes / totalIncrements).toFixed(1));
+            let newProgressBarNumber = startNumber + progressValue;
+            var percentageOfDifference = (difference * percentagePassed) / 100;
+            var progress = startNumber + percentageOfDifference;
+            progress = progress.toFixed(1);
+
+            if (progress < startNumber) {
+                progress = startNumber
+            }
+            else if (progress > endNumber) {
+                progress = endNumber
+            }
+
+        document.querySelector(".countdown_message_text").innerHTML = document.querySelector(".countdown_message_text").innerHTML.replace("{number}", progress);
+        // document.querySelector(".h--progress_bar_width").setAttribute("style", `width:${progress - 8}%;`)
+        // document.querySelector(".soldout_progress_container").setAttribute("style", `display:block;`)
+        
+      {% endif %}
+        // Calculate remaining time values
+        let days = Math.floor(distance / day),
+            hours = Math.floor((distance % day) / hour),
+            minutes = Math.floor((distance % hour) / minute),
+            seconds = Math.floor((distance % minute) / second);
+
+        // Add leading zeros if values are less than 10
+        days = (days < 10) ? '0' + days : days;
+        hours = (hours < 10) ? '0' + hours : hours;
+        minutes = (minutes < 10) ? '0' + minutes : minutes;
+        seconds = (seconds < 10) ? '0' + seconds : seconds;
+
+        // Update the timer display
+        document.querySelector('.countdown_message_timer_day').innerText = days;
+        document.querySelector('.countdown_message_timer_hr').innerText = hours;
+        document.querySelector('.countdown_message_timer_min').innerText = minutes;
+        document.querySelector('.countdown_message_timer_sec').innerText = seconds;
+
+        // If the countdown is over, display a message
+        if (distance < 0) {
+            clearInterval(x);
+            document.querySelector('.countdown_message_timer').innerText = 'Countdown expired';
+        }
+    }, second);
+} else {
+    // End date is in the past, handle accordingly (e.g., display a message)
+    document.querySelector('.countdown_message_timer').innerText = 'End date has passed';
+}
+    }
+   countdownTimerBar();
+</script>                     
+                      {% endif %}
+                      {% if block.settings.show_button == true %}
+                       {%- render 'button', content: block.settings.btn_text, href: block.settings.btn_link, size: block.settings.btn_size, style: block.settings.btn_style, width: block.settings.btn_width -%}
+                      {% endif %}
+                    </div>
+                    <div class="countdown_close">
+                      <svg class="countdown_close_icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M6 6L18 18" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                  </div>
+                {% endcase %}
+                <p class="bold {{ section.settings.text_size }} {% unless forloop.first %}reveal-invisible{% endunless %}" {{ block.shopify_attributes }}>
+                  {%- if block.settings.url != blank -%}
+                    <a href="{{ block.settings.url }}">{{ text }}</a>
+                  {%- else -%}
+                    {{ text }}
+                  {%- endif -%}
+                </p>
+              {%- endfor -%}              
+            </announcement-bar>
+
+            {%- if count > 1 -%}
+              <button class="tap-area" is="next-button" aria-controls="announcement-bar" aria-label="{{ 'general.accessibility.next' | t }}">
+                {%- render 'icon' with 'chevron-right', direction_aware: true -%}
+              </button>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+  </height-observer>
+
+  <script>
+    document.documentElement.style.setProperty('--announcement-bar-height', Math.round(document.getElementById('shopify-section-{{ section.id }}').clientHeight) + 'px');
+    document.querySelector(".countdown_close").addEventListener("click",()=>{
+      document.querySelector(".announcement-bar").classList.add("d_none");
+      console.log(setCookie)
+      setCookie("announcementHidden", true, 1);
+    })
+  </script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Countdown bar",
+  "class": "shopify-section--countdown-bar",
+  "tag": "aside",
+  "max_blocks": 5,
+  "blocks": [
+    {
+      "type": "message",
+      "name": "Message",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Announce something here"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Link"
+        }
+      ]
+    },
+    {
+      "type": "urgency",
+      "name": "Urgency message",
+      "settings": [
+        {
+          "type": "url",
+          "id": "url",
+          "label": "Link"
+        },
+        {
+          "type": "text",
+          "id": "start_time",
+          "label": "Start date and time",
+          "info": "Format: dd/mm/yyyy hh:mm:ss",
+          "placeholder": "dd/mm/yyyy hh:mm:ss"
+        },
+        {
+          "type": "text",
+          "id": "end_time",
+          "label": "End date and time",
+          "info": "Format: dd/mm/yyyy hh:mm:ss",
+          "placeholder": "dd/mm/yyyy hh:mm:ss"
+        },
+        {
+          "type": "number",
+          "id": "start_value",
+          "label": "Start value",
+          "default": 0
+        },
+        {
+          "type": "number",
+          "id": "end_value",
+          "label": "End value",
+          "default": 0
+        },
+        {
+          "type": "select",
+          "id": "value_increment",
+          "label": "Value increment",
+          "options": [
+            {
+              "value": "day",
+              "label": "Daily"
+            },
+            {
+              "value": "hour",
+              "label": "Hourly"
+            }
+          ]
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_before_start",
+          "label": "Hide before start date/time",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_after_end",
+          "label": "Hide after end date/time",
+          "default": false
+        },
+        {
+          "type": "paragraph",
+          "content": "The textareas have placeholders you can use that will be swapped with the value. Here are your options:"
+        },
+        {
+          "type": "paragraph",
+          "content": "[start_days] amount of days from now until the start date."
+        },
+        {
+          "type": "paragraph",
+          "content": "[start_hours] amount of hours from now until the start date."
+        },
+        {
+          "type": "paragraph",
+          "content": "[end_days] amount of days from now until the end date."
+        },
+        {
+          "type": "paragraph",
+          "content": "[end_hours] amount of hours from now until the end date."
+        },
+        {
+          "type": "paragraph",
+          "content": "[display] the current increment integer (ex: 1)"
+        },
+        {
+          "type": "paragraph",
+          "content": "[display_fraction] the current increment as a fraction one decimal place (ex: 1.2)"
+        },
+        {
+          "type": "paragraph",
+          "content": "[display_fraction_2] the current increment as a fraction two decimal place (ex: 1.23)"
+        },
+        {
+          "type": "textarea",
+          "id": "start_message",
+          "label": "Before start message",
+          "info": "If not hidden before start, this message will be shown",
+          "default": "Sale starts in [start_hours]"
+        },
+        {
+          "type": "textarea",
+          "id": "active_message",
+          "label": "Active message",
+          "info": "Shown when current date/time is between start and stop date/time",
+          "default": "Sale ends in [end_hours]"
+        },
+        {
+          "type": "textarea",
+          "id": "end_message",
+          "label": "After end message",
+          "info": "If not hidden after end, this message will be shown",
+          "default": "Sale is over"
+        }
+      ]
+    },
+    {
+      "name": "Countdown Message",
+      "type": "countdown_message",
+      "settings": [
+        {
+          "type": "checkbox",
+          "label": "Enable message",
+          "id": "show_message"
+        },
+        {
+          "type": "checkbox",
+          "label": "Enable percentage number",
+          "id": "show_percentage"
+        },
+        {
+          "type": "richtext",
+          "label": "Add message here:",
+          "id": "message_text",
+          "default": "<p>Nordic Hyper’s are {number}% SOLD OUT</p>",
+          "info": "Use {number} to show calculated percentage according to time elapsed."
+        },
+        {
+          "type": "checkbox",
+          "label": "Enable timer",
+          "id": "show_timer"
+        },
+        {
+          "type": "text",
+          "id": "start_number",
+          "label": "Starting number for timer",
+          "default": "52"
+        },
+        {
+          "type": "text",
+          "id": "end_number",
+          "label": "Ending number for timer",
+          "default": "99.9"
+        },
+        {
+          "type": "text",
+          "id": "count_date",
+          "label": "Start",
+          "default": "Jan 31, 2024",
+          "info": "(e.g. Jan 31, 2024)"
+        },
+        {
+          "type": "text",
+          "id": "count_date_picker",
+          "label": "End",
+          "default": "May 31, 2024",
+          "info": "(e.g. May 31, 2024)"
+        },
+        {
+          "type": "select",
+          "id": "timezone",
+          "label": "Select Time Zone:",
+          "options": [
+            {
+              "value": "America/New_York",
+              "label": "New York"
+            },
+            {
+              "value": "America/Los_Angeles",
+              "label": "Los Angeles"
+            },
+            {
+              "value": "America/Toronto",
+              "label": "Toronto"
+            },
+            {
+              "value": "Australia/Sydney",
+              "label": "Sydney"
+            },
+            {
+              "value": "Australia/Perth",
+              "label": "Perth"
+            },
+            {
+              "value": "Europe/Paris",
+              "label": "Paris"
+            },
+            {
+              "value": "Europe/London",
+              "label": "London"
+            },
+            {
+              "value": "Asia/Shanghai",
+              "label": "Shanghai"
+            }
+          ],
+          "default": "America/New_York"
+        },
+        {
+          "type": "checkbox",
+          "label": "Enable button",
+          "id": "show_button"
+        },
+        {
+          "type": "text",
+          "label": "Add button text here:",
+          "id": "btn_text",
+          "default": "SHOP $350 OFF"
+        },
+        {
+          "type": "url",
+          "label": "Link for button:",
+          "id": "btn_link"
+        },
+        {
+          "type": "select",
+          "id": "btn_size",
+          "label": "Button size",
+          "default": "base",
+          "options": [
+            {
+              "label": "Small",
+              "value": "sm"
+            },{
+              "label": "Default",
+              "value": "base"
+            },{
+              "label": "Large",
+              "value": "lg"
+            },{
+              "label": "X-large",
+              "value": "xl"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "btn_width",
+          "label": "Button width",
+          "default": "base",
+          "options": [{
+            "label": "Default",
+            "value": "base"
+          },{
+            "label": "Medium",
+            "value": "md"
+          },{
+            "label": "Large",
+            "value": "lg"
+          },{
+            "label": "X-large",
+            "value": "xl"
+          }]
+        },
+        {
+          "type": "select",
+          "id": "btn_style",
+          "label": "Button style",
+          "default": "fill",
+          "options": [{
+            "label":"Primary",
+            "value": "fill"
+          },{
+            "label":"Secondary",
+            "value":"secondary"
+          },{
+            "label":"Outline",
+            "value": "outline"
+          },{
+            "label":"Link",
+            "value": "link"
+          }]
+        },
+        {
+          "type": "checkbox",
+          "label": "Enable close button",
+          "id": "show_close"
+        }        
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_sticky",
+      "label": "Enable sticky bar",
+      "default": false
+    },
+    {
+      "type": "url",
+      "id": "announcement_link",
+      "label": "Link for whole bar",
+      "info": "Add link here to make bar clickable"
+    },
+    {
+      "type": "select",
+      "id": "text_size",
+      "label": "Text size",
+      "options": [
+        {
+          "value": "text-xxs",
+          "label": "X-Small"
+        },
+        {
+          "value": "text-xs",
+          "label": "Small"
+        },
+        {
+          "value": "text-base",
+          "label": "Medium"
+        },
+        {
+          "value": "text-lg",
+          "label": "Large"
+        }
+      ],
+      "default": "text-xs"
+    },
+    {
+      "type": "select",
+      "id": "navigation_mode",
+      "label": "Multiple message navigation",
+      "options": [
+        {
+          "value": "arrows",
+          "label": "Arrows"
+        },
+        {
+          "value": "scrolling",
+          "label": "Auto-scrolling"
+        }
+      ],
+      "default": "arrows"
+    },
+    {
+      "type": "range",
+      "id": "scrolling_speed",
+      "label": "Scrolling speed",
+      "min": 10,
+      "max": 30,
+      "unit": "s",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Colors",
+      "info": "Gradient replaces solid colors when set."
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background"
+    },
+    {
+      "type": "color_background",
+      "id": "background_gradient",
+      "label": "Background gradient"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Countdown Bar",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}

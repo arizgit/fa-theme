@@ -1,0 +1,215 @@
+{%- comment -%}
+------------------------------------------------------------------------------------------------------------------------
+LIQUID
+------------------------------------------------------------------------------------------------------------------------
+{%- endcomment -%}
+<revealed-image class="revealed-image bg-custom" data-offset-y="{{ section.settings.offset_y }}" data-offset-x="{{ section.settings.offset_x }}" data-offset-scale="{{ section.settings.offset_scale }}">
+  <span class="revealed-image__scroll-tracker"></span>
+
+  {%- assign background = section.settings.background | default: settings.background -%}
+
+  <div class="revealed-image__scroller bg-custom" style="--background: {{ background.rgb }}">
+    <div class="revealed-image__wrapper">
+      {%- if section.settings.background_image != blank -%}
+        {%- assign extension = section.settings.background_image | split: '.' | last -%}
+        {%- if extension == 'svg' -%}
+          {%- assign image_class = 'background-svg' -%}
+        {%- endif -%}
+        {{- section.settings.background_image | image_url: width: section.settings.background_image.width | image_tag: loading: 'lazy', widths: '200,300,400,500,600,700,800,900,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200', class: image_class -}}
+      {% endif %}
+      <div class="revealed-image__image-clipper">
+        {%- if section.settings.image != blank -%}
+          {%- if section.settings.mobile_image == blank -%}
+            {{- section.settings.image | image_url: width: section.settings.image.width | image_tag: loading: 'lazy', widths: '200,300,400,500,600,700,800,900,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200' -}}
+          {%- else -%}
+            {{- section.settings.image | image_url: width: section.settings.image.width | image_tag: loading: 'lazy', widths: '200,300,400,500,600,700,800,900,1000,1200,1400,1600,1800,2000,2200,2400,2600,2800,3000,3200', class: 'hidden md:block' -}}
+            {{- section.settings.mobile_image | image_url: width: section.settings.mobile_image.width | image_tag: loading: 'lazy', widths: '200,300,400,500,600,700,800,900,1000,1200,1400,1600', class: 'md:hidden' -}}
+          {%- endif -%}
+        {%- else -%}
+          {{- 'lifestyle-1' | placeholder_svg_tag: 'placeholder' | replace: '<svg', '<svg preserveAspectRatio="xMinYMin slice"' -}}
+        {%- endif -%}
+      </div>
+
+      {%- capture content -%}
+        {%- if section.settings.subheading != blank or section.settings.title != blank -%}
+          <div class="revealed-image__content-inner" style="--content-max-width:{{ section.settings.content_max_width |  append: 'rem' }}">
+            {%- if section.settings.subheading != blank -%}
+              <p class="{{ section.settings.subheading_class }} subheading-fa">{{ section.settings.subheading | escape }}</p>
+            {%- endif -%}
+
+            {%- if section.settings.title != blank -%}
+              <p class="{{ section.settings.title_class }} title-fa">{{ section.settings.title | escape }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endcapture -%}
+
+      {%- if content != blank -%}
+        <div {% render 'surface', class: 'revealed-image__content revealed-image__content--outside prose', text_color: section.settings.text_color_outside %}>
+          {{- content -}}
+        </div>
+
+        <div aria-hidden="true" {% render 'surface', class: 'revealed-image__content revealed-image__content--inside prose', text_color: section.settings.text_color_inside %}>
+          {{- content -}}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</revealed-image>
+
+{% schema %}
+{
+  "name": "Revealed img scroll (FA)",
+  "class": "shopify-section--revealed-image contents",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "3200 x 1600px .jpg recommended"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile image",
+      "info": "1125 x 2000px .jpg recommended"
+    },
+    {
+      "type": "range",
+      "id": "offset_x",
+      "label": "Position X offset",
+      "min": -50,
+      "max": 50,
+      "step": 1,
+      "unit": "%",
+      "default": -10
+    },
+    {
+      "type": "range",
+      "id": "offset_y",
+      "label": "Position Y offset",
+      "min": -50,
+      "max": 50,
+      "step": 1,
+      "unit": "%",
+      "default": -1
+    },
+    {
+      "type": "range",
+      "id": "offset_scale",
+      "label": "Scale offset",
+      "min": -50,
+      "max": 50,
+      "step": 1,
+      "unit": "%",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "content_max_width",
+      "label": "Content Area Max Width",
+      "info": "Set the max width of the content area over the media player.",
+      "max": 70,
+      "min": 10,
+      "step": 1,
+      "unit": "rem",
+      "default": 40
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image",
+      "info": "1125 x 2000px .jpg recommended"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading"
+    },
+    {
+      "type": "select",
+      "id": "subheading_class",
+      "label": "Subheading style",
+      "options": [
+        {
+          "value": "text-eyebrow",
+          "label": "Eyebrow"
+        },
+        {
+          "value": "text-base",
+          "label": "Default"
+        },
+	      {
+          "value": "bold",
+          "label": "Bold"
+        }
+      ],
+      "default": "text-eyebrow"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Reveal text on scroll"
+    },
+    {
+      "type": "select",
+      "id": "title_class",
+      "label": "Heading style",
+      "options": [
+        {
+          "value": "h0",
+          "label": "H0"
+        },
+        {
+          "value": "h1",
+          "label": "H1"
+        },
+        {
+          "value": "h2",
+          "label": "H2"
+        },
+        {
+          "value": "h3",
+          "label": "H3"
+        },
+        {
+          "value": "h4",
+          "label": "H4"
+        },
+        {
+          "value": "h5",
+          "label": "H5"
+        }
+      ],
+      "default": "h0"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background"
+    },
+    {
+      "type": "color",
+      "id": "text_color_inside",
+      "label": "Text (inside image)",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color_outside",
+      "label": "Text (outside image)",
+      "default": "#000000"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Revealed img scroll (FA)"
+    }
+  ]
+}
+{% endschema %}

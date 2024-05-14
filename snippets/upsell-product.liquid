@@ -1,0 +1,621 @@
+<style>
+  .slider {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    margin-right: 20px;
+}
+
+.slider input {
+    display: none;
+}
+
+/* Style the slider */
+.slider .slider-bar {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider .slider-thumb {
+    position: absolute;
+    cursor: pointer;
+    top: 4px;
+    left: 4px;
+    width: 26px;
+    height: 26px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+/* Style the check sign */
+input:checked + .slider-bar {
+    background-color: #0E9C9D;
+}
+
+input:checked + .slider-bar .slider-thumb {
+    transform: translateX(26px);
+}
+
+input:checked + .slider-bar .slider-thumb::before {
+    content: "\2714"; /* Unicode checkmark character */
+    display: block;
+    text-align: center;
+    line-height: 26px;
+    color: #0E9C9D;
+}
+.bundle-checkbox .text-on-sale {
+  color: #11171B;
+}
+.bundle-checkbox .text-subdued {
+  color: #52626C;
+}
+.upsell-container {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+.bundle-title-container {
+  display: flex;
+  background: #F15729;
+  padding: 8px;
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
+  align-items: center;
+}
+.bundle-title-icon {
+  width: 24px;
+  height: 24px;
+}
+.bundle-title {
+  font-size: 16px;
+  margin-left: 5px;
+}
+.bundle-body-container {
+  background: #F5F1E8;
+  padding: 10px 15px;
+  display: flex;
+  flex-direction: column;
+  color: #000000;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+.bundle-description-container {
+  margin-bottom: 15px;
+}
+.card-container {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+.card-container .plus-signal {
+  position: absolute;
+  left: 44%;
+  top: 18%;
+  box-shadow: 0px 2px 5px lightgrey;
+  color: #F15729;
+  font-size: 42px;
+  font-weight: 600;
+  width: 49px;
+  height: 49px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 15px 0px;
+}
+.card-block {
+  padding: 15px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  width: 49%;
+  border-radius: 5px;
+  justify-content: space-between;
+}
+.upsell-card-block {
+  background: #0E9C9D;
+  color: white;
+}
+.card-title {
+  height: 40px;
+  font-size: 18px;
+  line-height: 1.2;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+.card-image {
+  height: 130px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.card-image img {
+  width: 100%;
+  height: 100%;
+}
+.card-badge {
+  height: 30px;
+  background: #ffffff;
+  color: #000000;
+  font-size: 14px;
+  padding: 3px 9px;
+  border-radius: 5px;
+  margin-top: 5px;
+  margin-bottom: -10px;
+}
+.card-icon-text {
+  display: flex;
+  align-items: center;
+  padding: 10px 0px;
+}
+.product-card-icon-text {
+  border-top: 1px solid lightgrey;
+}
+.upsell-card-icon-text {
+  border-bottom: 1px solid #ffffff;
+}
+.card-icon-text p {
+  margin-left: 5px;
+}
+.card-text{
+  width: 142px;
+  margin: auto;
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+.upsell-check-item {
+  display: flex;
+  width: 100%;
+  font-size: 16px;
+}
+.upsell-text {
+  margin: auto;
+  margin-left: 0px;
+}
+.check-item-icon {
+  margin-right: 5px;
+}
+.product-card-block .card-text {
+  color: #52626C;
+}
+.card-block .price-list {
+  justify-content: center;
+}
+.card-block .text-on-sale {
+  font-size: 18px !important;
+}
+.card-block .text-subdued {
+  font-size: 18px !important;
+}
+.product-card-block .text-on-sale {
+  color: #11171B;
+}
+.product-card-block .text-subdued {
+  color: #52626C;
+}
+.card-bottom-text {
+  text-align: center;
+  margin-top: 10px;
+}
+.product-card-block .card-bottom-text {
+  color: #52626C;
+}
+.bundle-checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.product-container .upsell-card-block {
+  background: #52626C;
+}
+.product-container .upsell-card-block .upsell-description {
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .upsell-check-item {
+    font-size: 14px;
+  }
+  .card-image {
+    height: 105px;
+  }
+  .check-item-icon svg {
+    height: 18px;
+    width: 18px;
+  }
+  .card-block {
+    padding: 5px;
+  }
+}
+</style>
+
+{% assign upsell_product = product.metafields.custom.bundle_product.value %}
+<div class="upsell-container" id="upsell-container">
+  <div class="bundle-title-container">
+    <img class="bundle-title-icon" src="{{ settings.bundle_title_icon | image_url }}">
+    <p class="bundle-title">{{ settings.title }}</p>
+  </div>
+  <div class="bundle-body-container">
+    <div class="bundle-description-container">
+      <p>{{ settings.description }}</p>
+    </div>
+    <div class="bundle-checkbox">
+      <label class="slider">
+        <input type="checkbox" id="bundle-check" checked>
+        <span class="slider-bar" id="checkbox-slider">
+            <span class="slider-thumb"></span>
+        </span>
+      </label>
+      <div id="product-price-container" style="display: none;">
+        {%- render 'price-list',
+          list_price: product.metafields.custom.list_price,
+          sale_price: product.metafields.custom.sale_price,
+          variant: product.selected_or_first_available_variant,
+          size: 'lg',
+          block: block
+        -%}
+      </div>
+      <div id="bundle-price-container">
+        {% if product.metafields.custom.leg_developer_sale_price != blank and product.metafields.custom.leg_developer_list_price != blank %}
+          {%- render 'upsell-price-list',
+            list_price: product.metafields.custom.leg_developer_list_price,
+            sale_price: product.metafields.custom.leg_developer_sale_price,
+            product_list_price: product.metafields.custom.list_price,
+            product_sale_price: product.metafields.custom.sale_price,
+            variant: product.selected_or_first_available_variant,
+            size: 'lg',
+            block: block
+          -%}
+        {% else %}
+          {%- render 'upsell-price-list',
+            variant: product.selected_or_first_available_variant,
+            upsell_variant: upsell_product.selected_or_first_available_variant,
+            size: 'lg',
+            block: block
+          -%}
+        {% endif %}
+      </div>
+    </div>
+    <div class="card-container" id="bundle-container">
+      <p class="plus-signal">+</p>
+      <div class="card-block product-card-block">
+        <div class="card-title">
+          <p>{{ product.title }}</p>
+        </div>
+        <div class="card-image">
+          {% if settings.product_badge_text != blank %}
+            <div class="card-badge">{{ settings.product_badge_text }}</div>
+            <div class="card-image-with-badge">
+              <img src="{{ settings.product_image | image_url }}">
+            </div>
+          {% else %}
+            <div class="card-image-without-badge">
+              <img src="{{ settings.product_image | image_url }}">
+            </div>
+          {% endif %}
+        </div>
+        {% if settings.product_icon_image != blank %}
+          <div class="card-icon-text product-card-icon-text">
+            <img src="{{ settings.product_icon_image | image_url }}">
+            <p>{{ settings.product_icon_text }}</p>
+          </div>
+        {% endif %}
+        <p class="card-text">{{ settings.product_text }}</p>
+        <div>
+          {%- render 'price-list',
+            list_price: product.metafields.custom.list_price,
+            sale_price: product.metafields.custom.sale_price,
+            variant: product.selected_or_first_available_variant,
+            size: 'lg',
+            block: block
+          -%}
+        </div>
+      </div>
+      <div class="card-block upsell-card-block" id="upsell-card-block">
+        <div class="card-title">
+          <p>{{ upsell_product.title }}</p>
+        </div>
+        <div class="card-image">
+          {% if settings.upsell_badge_text != blank %}
+            <div class="card-badge">{{ settings.upsell_badge_text }}</div>
+            <div class="card-image-with-badge">
+              <img src="{{ settings.upsell_image | image_url }}">
+            </div>
+          {% else %}
+            <div class="card-image">
+              <img src="{{ settings.upsell_image | image_url }}">
+            </div>
+          {% endif %}
+        </div>
+        {% if settings.upsell_icon_image != blank %}
+          <div class="card-icon-text upsell-card-icon-text">
+            <img src="{{ settings.upsell_icon_image | image_url }}">
+            <p>{{ settings.upsell_icon_text }}</p>
+          </div>
+        {% endif %}
+        <div class="upsell-text">
+          {% if settings.upsell_component_1 != blank %}
+            <div class="upsell-check-item">
+              <span class="check-item-icon">{% render 'icon', icon: 'check' %}</span>
+              <p>{{ settings.upsell_component_1 }}</p>
+            </div>
+          {% endif %}
+          {% if settings.upsell_component_2 != blank %}
+            <div class="upsell-check-item">
+              <span class="check-item-icon">{% render 'icon', icon: 'check' %}</span>
+              <p>{{ settings.upsell_component_2 }}</p>
+            </div>
+          {% endif %}
+          {% if settings.upsell_component_3 != blank %}
+            <div class="upsell-check-item">
+              <span class="check-item-icon">{% render 'icon', icon: 'check' %}</span>
+              <p>{{ settings.upsell_component_3 }}</p>
+            </div>
+          {% endif %}
+        </div>
+        <div>
+          {% if product.metafields.custom.leg_developer_sale_price != blank and product.metafields.custom.leg_developer_list_price != blank %}
+            {%- render 'price-list',
+              list_price: product.metafields.custom.leg_developer_list_price,
+              sale_price: product.metafields.custom.leg_developer_sale_price,
+              variant: upsell_product.selected_or_first_available_variant,
+              size: 'lg',
+              block: block
+            -%}
+          {% else %}
+            {%- render 'price-list',
+              variant: upsell_product.selected_or_first_available_variant,
+              size: 'lg',
+              block: block
+            -%}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="card-container product-container" id="product-container" style="display: none">
+      <p class="plus-signal">+</p>
+      <div class="card-block product-card-block">
+        <div class="card-title">
+          <p>{{ product.title }}</p>
+        </div>
+        <div class="card-image">
+          {% if settings.product_badge_text != blank %}
+            <div class="card-badge">{{ settings.product_badge_text }}</div>
+            <div class="card-image-with-badge">
+              <img src="{{ settings.product_image | image_url }}">
+            </div>
+          {% else %}
+            <div class="card-image-without-badge">
+              <img src="{{ settings.product_image | image_url }}">
+            </div>
+          {% endif %}
+        </div>
+        {% if settings.product_icon_image != blank %}
+          <div class="card-icon-text product-card-icon-text">
+            <img src="{{ settings.product_icon_image | image_url }}">
+            <p>{{ settings.product_icon_text }}</p>
+          </div>
+        {% endif %}
+        <p class="card-text">{{ settings.product_text }}</p>
+        <div>
+          {%- render 'price-list',
+            list_price: product.metafields.custom.list_price,
+            sale_price: product.metafields.custom.sale_price,
+            variant: product.selected_or_first_available_variant,
+            size: 'lg',
+            block: block
+          -%}
+        </div>
+      </div>
+      <div class="card-block upsell-card-block" id="upsell-card-block">
+        <div class="card-title">
+          <p>{{ upsell_product.title }}</p>
+        </div>
+        <div class="card-image">
+          {% if settings.upsell_badge_text != blank %}
+            <div class="card-badge">{{ settings.upsell_badge_text }}</div>
+            <div class="card-image-with-badge">
+              <img src="{{ settings.without_upsell_image | image_url }}">
+            </div>
+          {% else %}
+            <div class="card-image">
+              <img src="{{ settings.without_upsell_image | image_url }}">
+            </div>
+          {% endif %}
+        </div>
+        {% if settings.upsell_icon_image != blank %}
+          <div class="card-icon-text upsell-card-icon-text">
+            <img src="{{ settings.upsell_icon_image | image_url }}">
+            <p>{{ settings.upsell_icon_text }}</p>
+          </div>
+        {% endif %}
+        <div class="upsell-text">
+          {% if settings.upsell_component_1 != blank %}
+            <div class="upsell-check-item">
+              <span class="check-item-icon">{% render 'icon', icon: 'check' %}</span>
+              <p>{{ settings.upsell_component_1 }}</p>
+            </div>
+          {% endif %}
+          {% if settings.upsell_component_2 != blank %}
+            <div class="upsell-check-item">
+              <span class="check-item-icon">{% render 'icon', icon: 'check' %}</span>
+              <p>{{ settings.upsell_component_2 }}</p>
+            </div>
+          {% endif %}
+          {% if settings.upsell_component_3 != blank %}
+            <div class="upsell-check-item">
+              <span class="check-item-icon">{% render 'icon', icon: 'check' %}</span>
+              <p>{{ settings.upsell_component_3 }}</p>
+            </div>
+          {% endif %}
+        </div>
+        <div>
+          {% if product.metafields.custom.leg_developer_sale_price != blank and product.metafields.custom.leg_developer_list_price != blank %}
+            {%- render 'price-list',
+              list_price: product.metafields.custom.leg_developer_list_price,
+              sale_price: product.metafields.custom.leg_developer_sale_price,
+              variant: upsell_product.selected_or_first_available_variant,
+              size: 'lg',
+              block: block
+            -%}
+          {% else %}
+            {%- render 'price-list',
+              variant: upsell_product.selected_or_first_available_variant,
+              size: 'lg',
+              block: block
+            -%}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    let checked = true;
+    const formId = 'product-form-{{ product.id }}';
+    const upsellContainer = document.getElementById('upsell-container');
+    const productForm = document.getElementById(formId);
+    const featureSection = document.getElementsByClassName("shopify-section--product-feature");
+    const resultSections = document.getElementsByClassName("shopify-section--image-result");
+    const videoSection = document.getElementsByClassName("shopify-section--video-steps");
+    if (featureSection.length > 0){
+      featureSection[0].style.display = 'flex';
+    }
+    if (videoSection.length > 0){
+      videoSection[0].style.display = 'flex';
+    }
+    if (resultSections.length > 0){
+      resultSections[0].style.display = 'flex';
+    }
+    if (resultSections.length > 1){
+      resultSections[1].style.display = 'flex';
+    }
+
+    const freeField1 = document.createElement("input");
+    freeField1.setAttribute("type", "hidden");
+    freeField1.setAttribute("name", "items[10]id");
+    freeField1.setAttribute("value", "{{ upsell_product.selected_or_first_available_variant.id }}");
+    productForm.appendChild(freeField1);
+
+    const checkbox = document.getElementById('bundle-check');
+    const bundleContainer = document.getElementById('bundle-container');
+    const productContainer = document.getElementById('product-container');
+    const productPriceContainer = document.getElementById('product-price-container');
+    const bundlePriceContainer = document.getElementById('bundle-price-container');
+    const quickAddContainer = document.getElementById('product-quick-add');
+    const upsellQuickAddContainer = document.getElementById('upsell-product-quick-add');
+
+    upsellQuickAddContainer.style.display = 'block';
+    quickAddContainer.style.display = 'none';
+
+    checkbox.addEventListener('click', function(e){
+      checked = !checked;
+      checkbox.checked = checked;
+      if (checked) {
+        bundleContainer.style.display = 'flex';
+        bundlePriceContainer.style.display = 'block';
+        productContainer.style.display = 'none';
+        productPriceContainer.style.display = 'none';
+        if (featureSection.length > 0){
+          featureSection[0].style.display = 'flex';
+        }
+        if (videoSection.length > 0){
+          videoSection[0].style.display = 'flex';
+        }
+        if (resultSections.length > 0){
+          resultSections[0].style.display = 'flex';
+        }
+        if (resultSections.length > 1){
+          resultSections[1].style.display = 'flex';
+        }
+        upsellQuickAddContainer.style.display = 'block';
+        quickAddContainer.style.display = 'none';
+        productForm.appendChild(freeField1);
+      } else {
+        bundleContainer.style.display = 'none';
+        bundlePriceContainer.style.display = 'none';
+        productContainer.style.display = 'flex';
+        productPriceContainer.style.display = 'block';
+        if (featureSection.length > 0){
+          featureSection[0].style.display = 'none';
+        }
+        if (videoSection.length > 0){
+          videoSection[0].style.display = 'none';
+        }
+        if (resultSections.length > 0){
+          resultSections[0].style.display = 'none';
+        }
+        if (resultSections.length > 1){
+          resultSections[1].style.display = 'none';
+        }
+        upsellQuickAddContainer.style.display = 'none';
+        quickAddContainer.style.display = 'block';
+        productForm.removeChild(freeField1);
+      }
+    });
+
+    upsellContainer.addEventListener("click", function(e){
+      checked = !checked;
+      checkbox.checked = checked;
+      if (checked) {
+        bundleContainer.style.display = 'flex';
+        bundlePriceContainer.style.display = 'block';
+        productContainer.style.display = 'none';
+        productPriceContainer.style.display = 'none';
+        if (featureSection.length > 0){
+          featureSection[0].style.display = 'flex';
+        }
+        if (videoSection.length > 0){
+          videoSection[0].style.display = 'flex';
+        }
+        if (resultSections.length > 0){
+          resultSections[0].style.display = 'flex';
+        }
+        if (resultSections.length > 1){
+          resultSections[1].style.display = 'flex';
+        }
+        upsellQuickAddContainer.style.display = 'block';
+        quickAddContainer.style.display = 'none';
+        productForm.appendChild(freeField1);
+      } else {
+        bundleContainer.style.display = 'none';
+        bundlePriceContainer.style.display = 'none';
+        productContainer.style.display = 'flex';
+        productPriceContainer.style.display = 'block';
+        if (featureSection.length > 0){
+          featureSection[0].style.display = 'none';
+        }
+        if (videoSection.length > 0){
+          videoSection[0].style.display = 'none';
+        }
+        if (resultSections.length > 0){
+          resultSections[0].style.display = 'none';
+        }
+        if (resultSections.length > 1){
+          resultSections[1].style.display = 'none';
+        }
+        upsellQuickAddContainer.style.display = 'none';
+        quickAddContainer.style.display = 'block';
+        productForm.removeChild(freeField1);
+      }
+    }, true);
+  });
+</script>

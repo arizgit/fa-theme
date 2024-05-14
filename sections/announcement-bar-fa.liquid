@@ -1,0 +1,106 @@
+<div>
+  {% render 'fa-announcement', settings: section.settings %}
+</div>
+
+{% schema %}
+{
+  "name": "Announcement Bar(FA)",
+  "class": "shopify-section--announcement-bar",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "start_time",
+      "label": "Start Time",
+      "default": "2024-04-22T00:00:00Z",
+      "info": "Format: yyyy-mm-ddThh:mm:ssZ"
+    },
+    {
+      "type": "text",
+      "id": "end_time",
+      "label": "End Time",
+      "default": "2024-04-22T00:00:00Z",
+      "info": "Format: yyyy-mm-ddThh:mm:ssZ"
+    },
+    {
+      "type": "select",
+      "id": "time_zone",
+      "label": "Time Zone",
+      "options": [
+        {
+          "value": "EST",
+          "label": "Eastern Standard Time (EST)"
+        },
+        {
+          "value": "PST",
+          "label": "Pacific Standard Time (PST)"
+        },
+        {
+          "value": "UK",
+          "label": "United Kingdom (GMT)"
+        },
+        {
+          "value": "Europe",
+          "label": "Central European Time (CET)"
+        },
+        {
+          "value": "China",
+          "label": "China Standard Time (CST)"
+        }
+      ],
+      "default": "EST"
+    },
+    {
+      "type": "number",
+      "id": "start_value",
+      "label": "Start Value",
+      "default": 5000
+    },
+    {
+      "type": "number",
+      "id": "end_value",
+      "label": "End Value",
+      "default": 9990
+    },
+    {
+      "type": "url",
+      "id": "colletion_url",
+      "label": "Url for a Collection"
+    },
+    {
+      "type": "richtext",
+      "id": "progress_text",
+      "label": "Progress Text",
+      "default": "<p>Nordic Hyper's are X% SOLD OUT</p>"
+    },
+    {
+      "type": "color",
+      "id": "segment_background_color",
+      "label": "Segment Background Color",
+      "default": "#353535"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#000000"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background Image"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Shop $350 Off"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Announcement Bar(FA)"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,382 @@
+{%- render 'page-anchor' -%}
+
+{%- unless section.settings.full_width -%}
+  {%- render 'section-spacing-collapsing' -%}
+{%- endunless -%}
+
+<style>
+  #shopify-section-{{ section.id }} {
+    {%- if section.settings.full_width -%}
+      --section-outer-spacing-block: 0;
+    {%- endif -%}
+
+    --content-over-media-overlay: {{ section.settings.overlay_color.rgb }} / {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+
+  }
+  #shopify-section-{{ section.id }} .featured_blog_content {
+    max-width: 100%;
+    margin-right: auto;
+    margin-left: 5rem;
+    width: 50%;
+  }
+  #shopify-section-{{ section.id }} .section {
+    background-color: #F2EEE5;
+  }
+  #shopify-section-{{ section.id }} .featured_blog_icon svg path {
+    fill: #fff;
+    stroke: #fff;
+  }
+  #shopify-section-{{ section.id }} .featured_blog_icon svg {
+    width: 3rem !important;
+    height: auto !important;
+  }
+  .featured_blog_media {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    overflow: hidden;
+    border-radius: {{section.settings.border_radius}}rem;
+  }
+  img.featured_blog_media_img {
+    width: 45%;
+  }
+  .featured_blog_media_bg {
+    width: 55%;
+    height: auto;
+    background: #161D21;
+    position: relative;
+  }
+  .featured_blog_media_bg:after {
+    content: "";
+    position: absolute;
+    right: -5rem;
+    top: -3rem;
+    width: 12rem;
+    height: 120%;
+    transform: rotate(17deg);
+    background-color: #161D21;
+  }
+  #shopify-section-{{ section.id }} .text-base.reduce-content.content-fa {
+    color: #C2D3DE;
+    text-transform: uppercase;
+  }
+  #shopify-section-{{ section.id }} a.button {
+    background: #fff;
+    color: #11171B;
+  }
+  @media only screen and (max-width:900px){
+    .featured_blog_media {
+      flex-direction: column-reverse;
+      justify-content: center;
+      align-items: center;
+      border-radius: 0;
+    }
+    .featured_blog_content {
+      width: 100% !important;
+      max-width: 100% !important;
+      padding: 2rem 3rem;
+      margin: auto 0 0 0 !important;
+  }
+    .featured_blog_media_bg:after {
+      content: none;
+    }
+    .featured_blog_media_bg , img.featured_blog_media_img {
+      width: 100%;
+    }
+    .featured_blog_media_bg {
+      height: 18.5rem;
+    }
+    #shopify-section-{{ section.id }} .section {
+      padding-left: 0;
+      padding-right: 0;
+    }
+    #shopify-section-{{ section.id }} a.button {
+      width: 100%;
+    }
+  }
+</style>
+{% assign selected_article = section.settings.selected_blog %}
+<!-- h-- overlay link starts here -->
+{% if section.settings.overlay_link != blank %}
+  <a class="overlay_link-custom" href="{{ section.settings.overlay_link }}"></a>
+{% endif %}
+<div {% render 'section-properties' %}>
+  {%- capture class -%}content-over-media content-over-media--{{ section.settings.image_size }} {% if section.settings.full_width %}full-bleed{% else %}shadow-block rounded{% endif %}{%- endcapture -%}
+  {% if section.settings['gap-row-mobile'] != 0 %}
+    {% assign mobile_gap = '--gap-row-mobile:' | append: section.settings['gap-row-mobile'] | append: 'rem;' %}
+  {% endif %}
+  <image-banner
+    reveal-on-scroll="true"
+    {% render 'surface', class: class, text_color: section.settings.text_color, style: mobile_gap %}
+  >
+    <div class="featured_blog_media">
+      <div class="featured_blog_media_bg"></div>
+      <img width="" height="" class="featured_blog_media_img" src="{{ selected_article.image | img_url: 'large' }}">
+    </div>
+    <div class="featured_blog_content">
+      <div class="prose has-spacer">
+        <div class="featured_blog_icon">
+          {% if selected_article.tags contains 'Training' %}
+            {% render 'icon-training' %}
+          {% elsif selected_article.tags contains 'Recovery' %}
+            {% render 'icon-recovery' %}
+          {% elsif selected_article.tags contains 'Nutrition' %}
+            {% render 'icon-nutrition' %}
+          {% endif %}
+        </div>
+        <p class="text-eyebrow subheading-fa">
+          {% if selected_article.tags contains 'Training' %}
+            Training
+          {% elsif selected_article.tags contains 'Recovery' %}
+            Recovery
+          {% elsif selected_article.tags contains 'Nutrition' %}
+            Nutrition
+          {% else %}
+            {{ selected_article.tags.first.title }}
+          {% endif %}
+        </p>
+        <div
+          class="spacer"
+          style="--default-spacer:{{ section.settings.default_space |  append: 'rem'  }};--mobile-spacer:{{ section.settings.mobile_space |  append: 'rem' }}"
+        ></div>
+        <p
+          class="{{ section.settings.heading_tag }} title-fa"
+          {% if settings.heading_apparition != 'none' %}
+            reveal-on-scroll="true"
+          {% endif %}
+        >
+          {%- render 'styled-text', content: selected_article.title, apparition_effect: true -%}
+        </p>
+        <div
+          class="spacer"
+          style="--default-spacer:{{ section.settings.default_space |  append: 'rem'  }};--mobile-spacer:{{ section.settings.mobile_space |  append: 'rem' }}"
+        ></div>
+        <div
+          class="text-base reduce-content content-fa"
+        >
+          {{ selected_article.metafields.custom.time_of_reading }} MIN READ • BY {{ selected_article.author }}
+        </div>
+        <div
+          class="spacer"
+          style="--default-spacer:{{ section.settings.default_space |  append: 'rem'  }};--mobile-spacer:{{ section.settings.mobile_space |  append: 'rem' }}"
+        ></div>
+        {%- render 'button',
+          content: section.settings.btn_text,
+          href: selected_article.url,
+          size: section.settings.btn_size,
+          style: section.settings.btn_style,
+          width: section.settings.btn_width
+        -%}
+      </div>
+    </div>
+  </image-banner>
+</div>
+
+{% schema %}
+{
+  "name": "Featured Blog Post (FA)",
+  "class": "shopify-section--featured-blog-post-fa",
+  "tag": "section",
+  "disabled_on": {
+    "templates": ["password"],
+    "groups": ["header", "custom.overlay"]
+  },
+  "settings": [
+    {
+      "type": "article",
+      "id": "selected_blog",
+      "label": "Select featured blog:"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width",
+      "default": false
+    },
+    {
+          "type": "range",
+          "id": "border_radius",
+          "label": "Border corner radius",
+          "info": "Add rounded corners.",
+          "min": 0,
+          "max": 5,
+          "step": 0.1,
+          "unit": "rem",
+          "default": 0.1
+        },
+    {
+      "type": "text",
+      "id": "nav_anchor_label",
+      "label": "Nav anchor label",
+      "info": "Used to build dynamic nav, requires section nav anchor links"
+    },
+    {
+      "type": "url",
+      "id": "overlay_link",
+      "label": "Link for image overlay",
+      "info": "Add link here to make section clickable"
+    },
+    {
+          "type": "select",
+          "id": "heading_tag",
+          "label": "Title Style",
+          "options": [
+            {
+              "value": "h0",
+              "label": "H0"
+            },
+            {
+              "value": "h1",
+              "label": "H1"
+            },
+            {
+              "value": "h2",
+              "label": "H2"
+            },
+            {
+              "value": "h3",
+              "label": "H3"
+            },
+            {
+              "value": "h4",
+              "label": "H4"
+            },
+            {
+              "value": "h5",
+              "label": "H5"
+            },
+            {
+              "value": "h6",
+              "label": "H6"
+            }
+          ],
+          "default": "h1"
+        },
+    {
+      "type": "text",
+      "id": "btn_text",
+      "label": "Text for button:",
+      "default": "READ STORY"
+    },
+    {
+          "type": "select",
+          "id": "btn_size",
+          "label": "Button size",
+          "default": "base",
+          "options": [
+            {
+              "label": "Small",
+              "value": "sm"
+            },{
+              "label": "Default",
+              "value": "base"
+            },{
+              "label": "Large",
+              "value": "lg"
+            },{
+              "label": "X-large",
+              "value": "xl"
+            }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "btn_width",
+          "label": "Button width",
+          "default": "base",
+          "options": [{
+            "label": "Default",
+            "value": "base"
+          },{
+            "label": "Medium",
+            "value": "md"
+          },{
+            "label": "Large",
+            "value": "lg"
+          },{
+            "label": "X-large",
+            "value": "xl"
+          }]
+        },
+        {
+          "type": "select",
+          "id": "btn_style",
+          "label": "Button style",
+          "default": "fill",
+          "options": [{
+            "label":"Primary",
+            "value": "fill"
+          },{
+            "label":"Secondary",
+            "value":"secondary"
+          },{
+            "label":"Outline",
+            "value": "outline"
+          },{
+            "label":"Link",
+            "value": "link"
+          }]
+        },
+    {
+          "type": "range",
+          "id": "default_space",
+          "default": 1,
+          "step": 0.5,
+          "unit": "rem",
+          "label": "Default Screen Spacer",
+          "info": "Desktop",
+          "min": 0,
+          "max": 16
+        },
+        {
+          "type": "range",
+          "id": "mobile_space",
+          "default": 1,
+          "step": 0.5,
+          "unit": "rem",
+          "label": "Small Screen Spacer",
+          "info": "Mobile & Tablet",
+          "min": 0,
+          "max": 16
+        },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color_scheme",
+      "id": "scheme",
+      "label": "Color Scheme"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Overlay",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "label": "Overlay opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 30
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured Blog Post (FA)"
+    }
+  ]
+}
+{% endschema %}
