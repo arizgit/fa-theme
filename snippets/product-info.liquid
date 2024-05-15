@@ -269,6 +269,13 @@
             -%}
           {%- endif -%}
         {%- else -%}
+
+          <div class="flex gap-9">
+            <span class="font-bold border-b-4 border-[#7602A4]">Description</span>
+            <span class="text-[#414141]">Features</span>
+            <span class="text-[#414141]">Movements</span>
+          </div>
+
           {%- if product.description != blank -%}
             <div class="product-info__description" {{ block.shopify_attributes }}>
               <div class="prose">
