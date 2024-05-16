@@ -68,11 +68,7 @@ button, input, optgroup, select, textarea {
   padding: 0;
 }
 
-button, select {
-  text-transform: none;
-}
-
-button, [type="button"], [type="reset"], [type="submit"] {
+[type="button"], [type="reset"] {
   -webkit-appearance: button;
   text-align: inherit;
   background-color: #0000;
