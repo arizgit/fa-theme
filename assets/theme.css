@@ -10375,10 +10375,6 @@ split-lines {
   visibility: hidden;
 }
 
-.relative {
-  position: relative;
-}
-
 .wrap {
   flex-wrap: wrap;
 }
